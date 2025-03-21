@@ -343,12 +343,16 @@ void electronic(){
     cout << "4 : Television    60000" << endl ;
     cout << "back to main menu (enter 0) :" << endl;
     cout << "enter your choice : " ;
+    
+    while(true){
+    
     int choice;
     cin >> choice;
+
+    if(choice>=1 && choice <=4){
     cout << "\nenter quantity : " ;
     int quantity;
     cin >> quantity;
-
     switch (choice)
     {
     case 1:
@@ -364,11 +368,14 @@ void electronic(){
     case 4 :
         Product ("Television" , 60000 , quantity);
         break ;
-    case 0 :
-        break ;
-    default:
-        break;
     }
+    break;
+    }
+    else{
+        cout << "you entered invalid choice : ";
+        continue ;
+    }
+}
 }
 
 void footware(){
@@ -381,10 +388,11 @@ void footware(){
     cout << "enter your choice : " ;
     int choice;
     cin >> choice;
-    cout << "\nenter quantity : " ;
-    int quantity;
-    cin >> quantity;
-
+    
+    if(choice>=1 && choice <=4){
+        cout << "\nenter quantity : " ;
+        int quantity;
+        cin >> quantity;
     switch (choice)
     {
     case 1:
@@ -400,10 +408,9 @@ void footware(){
     case 4 :
         Product ("Boots" , 3000 , quantity);
         break ;
-    case 0 :
-        break ;
     default:
         break;
+    }
     }
 }
 
@@ -417,10 +424,11 @@ void clothing(){
     cout << "enter your choice : " ;
     int choice;
     cin >> choice;
-    cout << "\nenter quantity : " ;
-    int quantity;
-    cin >> quantity;
-
+    
+    if(choice>=1 && choice <=4){
+        cout << "\nenter quantity : " ;
+        int quantity;
+        cin >> quantity;
     switch (choice)
     {
     case 1:
@@ -436,10 +444,9 @@ void clothing(){
     case 4 :
         Product ("Trousers" , 2000 , quantity);
         break ;
-    case 0 :
-        break ;
     default:
         break;
+    }
     }
 }
 
@@ -453,10 +460,11 @@ void accesesories(){
     cout << "enter your choice : " ;
     int choice;
     cin >> choice;
-    cout << "\nenter quantity : " ;
-    int quantity;
-    cin >> quantity;
-
+    
+    if(choice>=1 && choice <=4){
+        cout << "\nenter quantity : " ;
+        int quantity;
+        cin >> quantity;
     switch (choice)
     {
     case 1:
@@ -472,10 +480,9 @@ void accesesories(){
     case 4 :
         Product ("Chain" , 3000 , quantity);
         break ;
-    case 0 :
-        break ;
     default:
         break;
+    }
     }
 }
 
@@ -505,16 +512,10 @@ void Inventory (){
     case 4 :
         accesesories();
         break;
-    case 0 :
-        break ;
     default:
         break;
     }
-
     
-
-
-
 }
 
 int main() {
@@ -542,10 +543,9 @@ int main() {
             cout << "2 : Update Profile" << endl;
             cout << "3 : view inventory" << endl;
             cout << "4 : view cart" << endl;
-            cout << "5 : Add to cart" << endl;
-            cout << "6 : Remove from cart" << endl;
-            cout << "7 : Checkout" << endl;
-            cout << "8 : Logout" << endl;          
+            cout << "5 : Remove from cart" << endl;
+            cout << "6 : Checkout" << endl;
+            cout << "7 : Logout" << endl;          
             cout << "Enter your choice: ";
 
             int choice;
