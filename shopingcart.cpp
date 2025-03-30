@@ -610,7 +610,7 @@ int main() {
                 }
 
 
-                case 8: {
+                case 7: {
                     system("CLS");
                     cout << "Logging out..." << endl;
                     cout << "Press any key to continue...";
