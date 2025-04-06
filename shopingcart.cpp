@@ -114,48 +114,23 @@ class Product{
     string get_name(){
         return name;
     }
-   
     int get_price(){
         return price;
     }
     int get_quantity(){
         return quantity;
     }
-    void set_quantity(int quantity){
-        this->quantity=quantity;
-    }
+
     void set_price(int price){
         this->price=price;
     }
     void set_name(string name){
         this->name=name;
     }
-
+    void set_quantity(int quantity){
+        this->quantity=quantity;
+    }
 };
-
-// vector<string>pname;
-// vector<int>pquantity;
-// vector<int>price;
-// static int TotalPrice = 0;
-
-// void Product(string name,int q,int p){
-//     int size = pname.size();
-//     for(int i = 0 ; i<size ; i++){
-//         if(name == pname[i]){
-//             pquantity[i] += q;
-//             price[i] += p;
-//         }
-//         else{
-//             pname.push_back(name);
-//             pquantity.push_back(q);
-//             price.push_back(p);
-//         }
-//     }
-
-//     size = pname.size();
-//     for(int i =0 ; i<size ; i++)
-//         TotalPrice += price[i];
-// }
 
 
 string setPassword(){
@@ -213,22 +188,24 @@ string validphonenumberchecker(string phoneNumber) {
     return phoneNumber;
 }
 
-string validemailchecker(string email) {
-    while (true) {
-        int dot = 0, attherate = 0;
-
-        for (char ch : email) {
-            if (ch == '.') dot++;
-            if (ch == '@') attherate++;
+string validemailchecker(string email){
+    int es = email.size();
+    while(true)
+    {
+        int dot=0,atherate=0;
+        for(int i=0;i<es;i++)
+        {
+            if(email[i]=='.')   dot++;
+            if(email[i]=='@'&&email[i+1]!='.'&&email[i-1]!='.') atherate++;
         }
-
-        if (attherate == 1 && dot >= 1) {
-            return email;  //  If format is correct, return email
-        } else {
-            cout << "Invalid email format! Please enter again: ";
-            cin >> email;
+        if(atherate==1&&dot>=1 && email[es-1]!='.' && email[es-1]!='@' && email[0]!='@' && email[0]!='.') break;
+        else{
+            cout<<"You entered an invalid email addreess..."<<endl;
+            cout<<"\tEnter an valid email address : ";
+            cin>>email;
         }
     }
+    return email;
 }
 
 
@@ -382,23 +359,127 @@ void create_account()
 
 vector<Product> cart;
 
+// Define the products in each category
+vector<Product> electronics = {
+    Product("Laptop", 500, 10),
+    Product("Smartphone", 300, 20),
+    Product("Headphones", 100, 15),
+    Product("Tablet", 250, 12),
+    Product("Smartwatch", 200, 18),
+    Product("Bluetooth Speaker", 80, 25),
+    Product("Gaming Console", 400, 8),
+    Product("Wireless Mouse", 25, 30),
+    Product("Keyboard", 40, 22),
+    Product("Power Bank", 35, 35)
+};
+
+vector<Product> footwear = {
+    Product("Nike Shoes", 80, 30),
+    Product("Adidas Sneakers", 70, 25),
+    Product("Puma Sandals", 50, 40),
+    Product("Reebok Trainers", 75, 20),
+    Product("Vans Slip-ons", 60, 25),
+    Product("Formal Shoes", 90, 15),
+    Product("Flip Flops", 20, 50),
+    Product("Boots", 100, 10),
+    Product("Loafers", 65, 18),
+    Product("Crocs", 40, 35)
+};
+
+vector<Product> clothing = {
+    Product("T-Shirt", 20, 50),
+    Product("Jeans", 40, 30),
+    Product("Jacket", 60, 20),
+    Product("Sweater", 45, 25),
+    Product("Hoodie", 50, 28),
+    Product("Shorts", 25, 40),
+    Product("Skirt", 30, 35),
+    Product("Dress", 55, 22),
+    Product("Tracksuit", 70, 15),
+    Product("Blazer", 80, 10)
+};
+
+vector<Product> accessories = {
+    Product("Watch", 150, 10),
+    Product("Sunglasses", 50, 25),
+    Product("Backpack", 30, 40),
+    Product("Wallet", 25, 35),
+    Product("Belt", 20, 30),
+    Product("Cap", 15, 50),
+    Product("Scarf", 18, 45),
+    Product("Earrings", 35, 20),
+    Product("Necklace", 60, 15),
+    Product("Bracelet", 40, 18)
+};
+
+vector<Product> books = {
+    Product("The Great Gatsby", 15, 100),
+    Product("1984", 12, 80),
+    Product("To Kill a Mockingbird", 14, 90),
+    Product("The Alchemist", 13, 70),
+    Product("Sapiens", 20, 50),
+    Product("Atomic Habits", 18, 60),
+    Product("Harry Potter", 25, 75),
+    Product("The Hobbit", 16, 65),
+    Product("Rich Dad Poor Dad", 17, 85),
+    Product("The Psychology of Money", 19, 55)
+};
+
+vector<Product> sports = {
+    Product("Football", 25, 40),
+    Product("Basketball", 30, 35),
+    Product("Yoga Mat", 20, 50),
+    Product("Dumbbells (10kg)", 45, 15),
+    Product("Tennis Racket", 60, 20),
+    Product("Skipping Rope", 10, 60),
+    Product("Treadmill", 500, 5),
+    Product("Cycling Helmet", 35, 25),
+    Product("Resistance Bands", 15, 40),
+    Product("Fitness Tracker", 70, 12)
+};
+
+vector<Product> health = {
+    Product("Vitamins (60 tabs)", 20, 30),
+    Product("First Aid Kit", 25, 20),
+    Product("Thermometer", 15, 25),
+    Product("Blood Pressure Monitor", 50, 10),
+    Product("Hand Sanitizer", 5, 100),
+    Product("Face Masks (50 pcs)", 10, 75),
+    Product("Pain Relief Spray", 8, 40),
+    Product("Cough Syrup", 6, 50),
+    Product("Disinfectant Wipes", 7, 60),
+    Product("Bandages", 3, 80)
+};
+
+vector<Product> groceries = {
+    Product("Rice (5kg)", 20, 50),
+    Product("Sugar (1kg)", 2, 100),
+    Product("Flour (2kg)", 3, 80),
+    Product("Cooking Oil (1L)", 5, 60),
+    Product("Salt (1kg)", 1, 150),
+    Product("Pasta (500g)", 2, 120),
+    Product("Canned Beans", 1, 200),
+    Product("Frozen Vegetables", 3, 90),
+    Product("Spices Set", 10, 40),
+    Product("Tea Bags (100 pcs)", 5, 70)
+};
+
 void selectProduct(vector<Product>& products) {
     int choice, quantity;
-
+    int size = products.size();
+    cout << size << endl;
     system("CLS");
-        cout << left << setw(5) << "ID" << setw(15) << "Product" << setw(10) << "Price" << endl;
+        cout << left << setw(5) << "ID" << setw(35) << "Product" << setw(30) << "Price" << endl;
         cout << "---------------------------------" << endl;
-        for (int i = 0; i < products.size(); i++) {
-            cout << setw(5) << i + 1 << setw(15) << products[i].get_name() << setw(10) << products[i].get_price() << endl;
+        for (int i = 0; i < size ; i++) {
+            cout << setw(5) << i + 1 << setw(35) << products[i].get_name() << setw(30) << products[i].get_price() << endl;
         }
 
-        cout << "\nEnter 0 to go back." << endl;
-        cout << "Enter your choice: ";
-
+        cout << "\nEnter 0 to go back : " << endl;
     while (true) {
 
         cout << "\nEnter your choice: ";
-        while (!(cin >> choice) || (choice < 0 || choice > 3)) { 
+        while (!(cin >> choice) || (choice < 0 || choice > size )) { 
             cout << "Invalid choice! Please enter a valid option: ";
             cin.clear();  // Clear error flag
             cin.ignore(1000, '\n');  // Ignore invalid input
@@ -416,23 +497,33 @@ void selectProduct(vector<Product>& products) {
         }
 
         if(quantity > products[choice - 1].get_quantity()) {
-            cout << "\nNot enough stock available! Please enter a valid quantity." << endl;
+            cout << "\nSorry, We have Not enough stock available! Please enter a valid quantity." << endl;
             cout << "Available quantity: " << products[choice - 1].get_quantity() << endl;
             cin.clear();
             cin.ignore(1000, '\n');  // Ignore invalid input  
         }
 
-       
-        // Update quantity and add product to cart
-        if (quantity <= products[choice - 1].get_quantity()){
-            // Update available quantity in inventory
-            products[choice - 1].set_quantity(products[choice - 1].get_quantity() - quantity); 
-            // Add product to cart with quantity
-            cart.push_back(Product(products[choice - 1].get_name(), products[choice - 1].get_price(), quantity));
-            cout << "Product added to cart Succesfully!\n" << endl;
+        bool found = false;
+
+        for (auto &item : cart) {
+            if (item.get_name() == products[choice - 1].get_name())
+            {
+                if(quantity <= products[choice - 1].get_quantity()){
+                    // Item already exists in cart: update quantity and price
+                    item.set_quantity(item.get_quantity() + quantity);
+                    item.set_price(item.get_price() + products[choice - 1].get_price() * quantity);
+                }
+                found = true;
+                break;
+            }
         }
 
-
+        if (!found) {
+            // Item does not exist in cart: add new item
+            if(quantity <= products[choice - 1].get_quantity()){
+                cart.push_back(Product(products[choice - 1].get_name(), products[choice - 1].get_price() * quantity, quantity));
+            }
+        }
         continue;  
     }
 }
@@ -447,7 +538,7 @@ void viewcart(){
         for (int i = 0; i < cart.size(); i++) {
             cout << setw(5) << i + 1 << setw(15) << cart[i].get_name() << setw(15) << cart[i].get_quantity()<< setw(10) << cart[i].get_price() << endl;
         }
-        cout << "\npress 0 to return";
+        cout << "\nPress 0 to go back : " ;
         cin >> n;
         if(n==0)
         return;
@@ -455,30 +546,6 @@ void viewcart(){
     
 }
 
-// Define the products in each category
-vector<Product> electronics = {
-    Product("Laptop", 500, 10),
-    Product("Smartphone", 300, 20),
-    Product("Headphones", 100, 15)
-};
-
-vector<Product> footwear = {
-    Product("Nike Shoes", 80, 30),
-    Product("Adidas Sneakers", 70, 25),
-    Product("Puma Sandals", 50, 40)
-};
-
-vector<Product> clothing = {
-    Product("T-Shirt", 20, 50),
-    Product("Jeans", 40, 30),
-    Product("Jacket", 60, 20)
-};
-
-vector<Product> accessories = {
-    Product("Watch", 150, 10),
-    Product("Sunglasses", 50, 25),
-    Product("Backpack", 30, 40)
-};
 
 
 void Inventory() {
@@ -490,12 +557,16 @@ void Inventory() {
         cout << "2 : Footwear" << endl;
         cout << "3 : Clothing" << endl;
         cout << "4 : Accessories" << endl;
+        cout << "5 : Books" << endl;
+        cout << "6 : Sports" << endl;
+        cout << "7 : Health" << endl;
+        cout << "8 : Groceries" << endl;
         cout << "0 : Go Back" << endl;
 
         int choice;
         cout << "Enter your choice: ";
 
-        while (!(cin >> choice) || (choice < 0 || choice > 4)) { 
+        while (!(cin >> choice) || (choice < 0 || choice > 8)) { 
             cout << "Invalid choice! Please enter a valid option: ";
             cin.clear();  // Clear error flag
             cin.ignore(1000, '\n');  // Ignore invalid input
@@ -514,6 +585,18 @@ void Inventory() {
             case 4: 
                 selectProduct(accessories); 
                 break;
+            case 5:
+                selectProduct(books); 
+                break;
+            case 6:
+                selectProduct(sports); 
+                break;
+            case 7:
+                selectProduct(health); 
+                break;
+            case 8:
+                selectProduct(groceries); 
+                break;    
             case 0: 
                 return;  // Exit inventory and return to the main menu
         }
