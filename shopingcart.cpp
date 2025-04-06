@@ -1,6 +1,11 @@
 #include<iostream>
 #include<string>
+#include<vector>
+#include<algorithm>
+#include<cstdlib>
+#include<cstring>
 #include<conio.h>
+#include<iomanip>
 #include<windows.h>
 
 using namespace std; 
@@ -24,7 +29,7 @@ class Customer{
 
     Customer (string name ,string username ,string phone_no ,string email ,string address ,string password ){
         this->name = name ;
-        this->username = name ;
+        this->username = username ;
         this->phone_no = phone_no ;
         this->email = email ;
         this->address = address ;
@@ -40,7 +45,7 @@ class Customer{
     }
 
     string get_password(){
-        return phone_no ;
+        return password ;
     }
 
     string get_email(){
@@ -92,8 +97,8 @@ class Customer{
         cout << "\tphone_no : " << phone_no << endl ;
     }
 
-}customers[10];
-
+};
+vector<Customer> customers;
 
 class Product{
     string name;
@@ -128,6 +133,29 @@ class Product{
 
 };
 
+// vector<string>pname;
+// vector<int>pquantity;
+// vector<int>price;
+// static int TotalPrice = 0;
+
+// void Product(string name,int q,int p){
+//     int size = pname.size();
+//     for(int i = 0 ; i<size ; i++){
+//         if(name == pname[i]){
+//             pquantity[i] += q;
+//             price[i] += p;
+//         }
+//         else{
+//             pname.push_back(name);
+//             pquantity.push_back(q);
+//             price.push_back(p);
+//         }
+//     }
+
+//     size = pname.size();
+//     for(int i =0 ; i<size ; i++)
+//         TotalPrice += price[i];
+// }
 
 
 string setPassword(){
@@ -135,10 +163,12 @@ string setPassword(){
     while(1){
         char s;
         s=getch();
-        if (s == '\b') {
+        if (!password.empty() && s == '\b') {
             cout << "\b \b";
             password.pop_back();
         }
+
+        
         if(s=='\r') 
             break;
         else    
@@ -148,14 +178,23 @@ string setPassword(){
     return password;
 }
 
+
+bool emailexistornot(string email){
+    for(int i=0;i<customers.size();i++){
+        if(customers[i].get_email()==email)
+            return true;
+    }
+    return false;
+}
+
 string validphonenumberchecker(string phoneNumber) {
     while (true) {
         bool isValid = true;
-
         // Check length
         if (phoneNumber.size() != 10||phoneNumber.empty()) {
             isValid = false;
-        } else {
+        }
+        else {
             // Check each character is a digit
             for (int i = 0; i < 10; i++) {
                 if (phoneNumber[i] < '0' || phoneNumber[i] > '9') {
@@ -167,8 +206,8 @@ string validphonenumberchecker(string phoneNumber) {
 
         if (isValid) break;
 
-        cout <<endl<< "You entered an invalid number..."<<endl<<endl;
-        cout << "Enter a valid number: ";
+        cout << "You entered an invalid number..."<<endl;
+        cout << "\tEnter a valid number: ";
         cin >> phoneNumber;
     }
     return phoneNumber;
@@ -285,7 +324,7 @@ Customer &login(bool &loginflag){
                 loginflag = true;
                 return customers[account_index];
             } else {
-                cout << "\nIncorrect password! Please try again.\n"<<endl;
+                cout << "\nIncorrect password! Please try again."<<endl;
             }
         }
     }
@@ -308,6 +347,11 @@ void create_account()
     getline(cin,name);
     cout<<"\tEnter email address : ";
     cin>>email;
+    // Check if email already exists
+    while (emailexistornot(email)) {
+        cout << "\tEmail already exists! Please enter a different email: ";
+        cin >> email;
+    }
     email=validemailchecker(email);
     cout<<"\tEnter phone no : ";
     cin>>phone_no;
@@ -327,7 +371,8 @@ void create_account()
     }
 
     system("CLS");
-    customers[numberofuser-startingAccountNumber]=Customer(name,username,phone_no,email,address,password);
+    customers.push_back(Customer(name, username, phone_no, email, address, password));
+    numberofuser++;
     cout<<endl<<"\tAccount created successfully !"<<endl;
     cout<<"\tpress any key to continue...";
     getch();
@@ -335,188 +380,146 @@ void create_account()
     numberofuser++;   
 }
 
-void electronic(){
-    system("CLS");
-    cout << "1 : Mobile    20000 " << endl;
-    cout << "2 : Laptop     60000" << endl ;
-    cout << "3 : Camera     15000" << endl ;
-    cout << "4 : Television    60000" << endl ;
-    cout << "back to main menu (enter 0) :" << endl;
-    cout << "enter your choice : " ;
-    
-    while(true){
-    
-    int choice;
-    cin >> choice;
+vector<Product> cart;
 
-    if(choice>=1 && choice <=4){
-    cout << "\nenter quantity : " ;
-    int quantity;
-    cin >> quantity;
-    switch (choice)
-    {
-    case 1:
-        /* code */
-        Product ("Mobile" ,20000 , quantity);
-        break;
-    case 2 :
-        Product ("Laptop" ,60000 , quantity);
-        break;
-    case 3 :
-        Product ("Camera" ,15000 , quantity);
-        break;
-    case 4 :
-        Product ("Television" , 60000 , quantity);
-        break ;
-    }
-    break;
-    }
-    else{
-        cout << "you entered invalid choice : ";
-        continue ;
-    }
-}
-}
+void selectProduct(vector<Product>& products) {
+    int choice, quantity;
 
-void footware(){
     system("CLS");
-    cout << "1 : Shoes    2000 " << endl;
-    cout << "2 : Sandals     1000" << endl ;
-    cout << "3 : Slippers     500" << endl ;
-    cout << "4 : Boots    3000" << endl ;
-    cout << "back to main menu (enter 0) :" << endl;
-    cout << "enter your choice : " ;
-    int choice;
-    cin >> choice;
-    
-    if(choice>=1 && choice <=4){
-        cout << "\nenter quantity : " ;
-        int quantity;
+        cout << left << setw(5) << "ID" << setw(15) << "Product" << setw(10) << "Price" << endl;
+        cout << "---------------------------------" << endl;
+        for (int i = 0; i < products.size(); i++) {
+            cout << setw(5) << i + 1 << setw(15) << products[i].get_name() << setw(10) << products[i].get_price() << endl;
+        }
+
+        cout << "\nEnter 0 to go back." << endl;
+        cout << "Enter your choice: ";
+
+    while (true) {
+
+        cout << "\nEnter your choice: ";
+        while (!(cin >> choice) || (choice < 0 || choice > 3)) { 
+            cout << "Invalid choice! Please enter a valid option: ";
+            cin.clear();  // Clear error flag
+            cin.ignore(1000, '\n');  // Ignore invalid input
+        }
+        if (choice == 0) {
+            return;  // Exit product selection
+        }
+        cout << "Enter quantity: ";
         cin >> quantity;
-    switch (choice)
-    {
-    case 1:
-        /* code */
-        Product ("Shoes" ,2000 , quantity);
-        break;
-    case 2 :
-        Product ("Sandals" ,1000 , quantity);
-        break;
-    case 3 :
-        Product ("Slippers" ,500 , quantity);
-        break;
-    case 4 :
-        Product ("Boots" , 3000 , quantity);
-        break ;
-    default:
-        break;
-    }
+
+        if (quantity <= 0 ) {
+            cout << "\nInvalid quantity! Please enter a valid quantity." << endl;
+            cin.clear();
+            cin.ignore(1000, '\n');  // Ignore invalid input
+        }
+
+        if(quantity > products[choice - 1].get_quantity()) {
+            cout << "\nNot enough stock available! Please enter a valid quantity." << endl;
+            cout << "Available quantity: " << products[choice - 1].get_quantity() << endl;
+            cin.clear();
+            cin.ignore(1000, '\n');  // Ignore invalid input  
+        }
+
+       
+        // Update quantity and add product to cart
+        if (quantity <= products[choice - 1].get_quantity()){
+            // Update available quantity in inventory
+            products[choice - 1].set_quantity(products[choice - 1].get_quantity() - quantity); 
+            // Add product to cart with quantity
+            cart.push_back(Product(products[choice - 1].get_name(), products[choice - 1].get_price(), quantity));
+            cout << "Product added to cart Succesfully!\n" << endl;
+        }
+
+
+        continue;  
     }
 }
 
-void clothing(){
+void viewcart(){
     system("CLS");
-    cout << "1 : T-shirt    500 " << endl;
-    cout << "2 : Shirt     1000" << endl ;
-    cout << "3 : Jeans     1500" << endl ;
-    cout << "4 : Trousers    2000" << endl ;
-    cout << "back to main menu (enter 0) :" << endl;
-    cout << "enter your choice : " ;
-    int choice;
-    cin >> choice;
-    
-    if(choice>=1 && choice <=4){
-        cout << "\nenter quantity : " ;
-        int quantity;
-        cin >> quantity;
-    switch (choice)
-    {
-    case 1:
-        /* code */
-        Product ("T-shirt" ,500 , quantity);
-        break;
-    case 2 :
-        Product ("Shirt" ,1000 , quantity);
-        break;
-    case 3 :
-        Product ("Jeans" ,1500 , quantity);
-        break;
-    case 4 :
-        Product ("Trousers" , 2000 , quantity);
-        break ;
-    default:
-        break;
-    }
-    }
-}
-
-void accesesories(){
-    system("CLS");
-    cout << "1 : Watch    5000 " << endl;
-    cout << "2 : Bracelet     2000" << endl ;
-    cout << "3 : Ring     1000" << endl ;
-    cout << "4 : Chain    3000" << endl ;
-    cout << "back to main menu (enter 0) :" << endl;
-    cout << "enter your choice : " ;
-    int choice;
-    cin >> choice;
-    
-    if(choice>=1 && choice <=4){
-        cout << "\nenter quantity : " ;
-        int quantity;
-        cin >> quantity;
-    switch (choice)
-    {
-    case 1:
-        /* code */
-        Product ("Watch" ,5000 , quantity);
-        break;
-    case 2 :
-        Product ("Bracelet" ,2000 , quantity);
-        break;
-    case 3 :
-        Product ("Ring" ,1000 , quantity);
-        break;
-    case 4 :
-        Product ("Chain" , 3000 , quantity);
-        break ;
-    default:
-        break;
-    }
-    }
-}
-
-
-
-void Inventory (){
-    system("CLS");
-    cout << "1 : Electronic" << endl;
-    cout << "2 : footware" << endl ;
-    cout << "3 : clothing" << endl ;
-    cout << "4 : accesesories" << endl ;
-    cout << "back to main menu (enter 0) :" << endl;
-    cout << "enter your choice : " ;
     int n;
-    cin >> n;
-    switch (n)
-    {
-    case 1:
-        electronic();
-        break;
-    case 2 :
-        footware();
-        break ;
-    case 3 :
-        clothing();
-        break;
-    case 4 :
-        accesesories();
-        break;
-    default:
-        break;
+    while(true){
+        
+        cout << left << setw(5) << "ID" << setw(15) << "Product" << setw(15) << "Quantity"<< setw(10) << "Price" << endl;
+        cout << "---------------------------------" << endl;
+        for (int i = 0; i < cart.size(); i++) {
+            cout << setw(5) << i + 1 << setw(15) << cart[i].get_name() << setw(15) << cart[i].get_quantity()<< setw(10) << cart[i].get_price() << endl;
+        }
+        cout << "\npress 0 to return";
+        cin >> n;
+        if(n==0)
+        return;
     }
     
 }
+
+// Define the products in each category
+vector<Product> electronics = {
+    Product("Laptop", 500, 10),
+    Product("Smartphone", 300, 20),
+    Product("Headphones", 100, 15)
+};
+
+vector<Product> footwear = {
+    Product("Nike Shoes", 80, 30),
+    Product("Adidas Sneakers", 70, 25),
+    Product("Puma Sandals", 50, 40)
+};
+
+vector<Product> clothing = {
+    Product("T-Shirt", 20, 50),
+    Product("Jeans", 40, 30),
+    Product("Jacket", 60, 20)
+};
+
+vector<Product> accessories = {
+    Product("Watch", 150, 10),
+    Product("Sunglasses", 50, 25),
+    Product("Backpack", 30, 40)
+};
+
+
+void Inventory() {
+    while (true) {
+        system("CLS");
+        cout << "Welcome to the Inventory!" << endl;
+        cout << "Please select a category:\n";
+        cout << "1 : Electronics" << endl;
+        cout << "2 : Footwear" << endl;
+        cout << "3 : Clothing" << endl;
+        cout << "4 : Accessories" << endl;
+        cout << "0 : Go Back" << endl;
+
+        int choice;
+        cout << "Enter your choice: ";
+
+        while (!(cin >> choice) || (choice < 0 || choice > 4)) { 
+            cout << "Invalid choice! Please enter a valid option: ";
+            cin.clear();  // Clear error flag
+            cin.ignore(1000, '\n');  // Ignore invalid input
+        }
+
+        switch (choice) {
+            case 1: 
+                selectProduct(electronics); 
+                break;
+            case 2: 
+                selectProduct(footwear); 
+                break;
+            case 3: 
+                selectProduct(clothing); 
+                break;
+            case 4: 
+                selectProduct(accessories); 
+                break;
+            case 0: 
+                return;  // Exit inventory and return to the main menu
+        }
+    }
+}
+
 
 int main() {
     while (true) {
@@ -607,6 +610,11 @@ int main() {
                 case 3 : {
                     Inventory();
                     break ;
+                }
+
+                case 4 : {
+                    viewcart();
+                    break;
                 }
 
 
