@@ -133,24 +133,28 @@ class Product{
 };
 
 
-string setPassword(){
+string setPassword() {
     string password;
-    while(1){
-        char s;
-        s=getch();
-        if (!password.empty() && s == '\b') {
-            cout << "\b \b";
-            password.pop_back();
+    while (true) {
+        password.clear(); // Clear previous input
+        while (true) {
+            char s = getch();
+            if (!password.empty() && s == '\b') { // Handle backspace
+                cout << "\b \b";
+                password.pop_back();
+            } else if (s == '\r' || s == '\n') { // Enter key pressed
+                if (password.empty()) {
+                    cout << "\nPassword cannot be empty! Please enter a password.";
+                    break; // Break inner loop to prompt again
+                } else {
+                    return password; // Return valid password
+                }
+            } else { // Add character to password
+                password += s;
+                cout << "*";
+            }
         }
-
-        
-        if(s=='\r' || s=='\n')
-            break;
-        else    
-            password+=s;
-        cout<<"*";
     }
-    return password;
 }
 
 
@@ -327,7 +331,7 @@ Customer &login(bool &loginflag) {
             loginflag = true;
             return customers[account_index];
         } else {
-            cout << "\nIncorrect password! Try again or enter 0 to return.\n" << endl;
+            cout << "Incorrect password! Try again or enter 0 to return." << endl;
         }
     }
 
