@@ -144,7 +144,7 @@ string setPassword(){
         }
 
         
-        if(s=='\r') 
+        if(s=='\r' || s=='\n')
             break;
         else    
             password+=s;
@@ -188,26 +188,45 @@ string validphonenumberchecker(string phoneNumber) {
     return phoneNumber;
 }
 
-string validemailchecker(string email){
-    int es = email.size();
-    while(true)
-    {
-        int dot=0,atherate=0;
-        for(int i=0;i<es;i++)
-        {
-            if(email[i]=='.')   dot++;
-            if(email[i]=='@'&&email[i+1]!='.'&&email[i-1]!='.') atherate++;
+string validemailchecker(string email) {
+    while (true) {
+        int es = email.size();
+        int dot = 0, at = 0;
+        bool valid = true;
+
+        // Check for exit condition first
+        if (email == "0") {
+            return ""; // Empty string signals exit
         }
-        if(atherate==1&&dot>=1 && email[es-1]!='.' && email[es-1]!='@' && email[0]!='@' && email[0]!='.') break;
-        else{
-            cout<<"You entered an invalid email addreess..."<<endl;
-            cout<<"\tEnter an valid email address : ";
-            cin>>email;
+
+        // Basic checks
+        if (es < 5) { // Minimum reasonable email length (e.g., a@b.c)
+            valid = false;
+        } else {
+            for (int i = 0; i < es; i++) {
+                if (email[i] == '.') dot++;
+                if (email[i] == '@') {
+                    if (i == 0 || i == es - 1 || email[i + 1] == '.' || email[i - 1] == '.') {
+                        valid = false; // @ at start/end or adjacent to dot is invalid
+                    } else {
+                        at++;
+                    }
+                }
+            }
+            // Ensure exactly one @ and at least one dot after @
+            if (at != 1 || dot < 1 || email[es - 1] == '.' || email[es - 1] == '@') {
+                valid = false;
+            }
+        }
+
+        if (valid) {
+            return email; // Valid email
+        } else {
+            cout << "Invalid email format! (e.g., user@domain.com, or 0 to return): ";
+            cin >> email;
         }
     }
-    return email;
 }
-
 
 bool checkforlogin()
 {
@@ -236,7 +255,9 @@ bool checkforlogin()
 
 }
 
-Customer &login(bool &loginflag){
+
+
+Customer &login(bool &loginflag) {
     system("CLS");
     cout << "Login Section:\n\n";
 
@@ -244,24 +265,29 @@ Customer &login(bool &loginflag){
     int account_index = -1;
 
     while (true) {
-        cout << "Enter email address (or enter 0 to exit): ";
-        cin>>email;
-        // Allow user to exit at any time
+        cout << "Enter email address (or 0 to return to main menu): ";
+        cin >> email;
+
+        // Exit option directly from initial prompt
         if (email == "0") {
             loginflag = false;
-            break;
+            return customers[numberofuser - startingAccountNumber]; // Return to main menu
         }
 
-        // If user presses Enter without typing an email, ask again
+        // Check for empty input
         if (email.empty()) {
             cout << "\nPlease enter an email address!" << endl;
-            continue;  
+            continue;
         }
 
-        // Check email format immediately
+        // Validate email format
         email = validemailchecker(email);
+        if (email.empty()) { // User entered "0" during validation
+            loginflag = false;
+            return customers[numberofuser - startingAccountNumber]; // Return to main menu
+        }
 
-        // Now, check if the email exists in the system
+        // Check if email exists
         account_index = -1;
         for (int i = 0; i < numberofuser - startingAccountNumber; i++) {
             if (email == customers[i].get_email()) {
@@ -270,48 +296,49 @@ Customer &login(bool &loginflag){
             }
         }
 
-        // If email does not exist, allow retries
         if (account_index == -1) {
-            cout << "Account does not exist! Please create an account first." <<"\n"<< endl;
-            continue;  
-            
-        } else     break;  
-    }
-
-    string password;
-
-    if(loginflag==true){
-        while (true) {
-            cout << "Enter password (or enter 0 to exit): ";
-            password = setPassword();
-            
-            // Allow user to exit at any time
-            if (password == "0") {
-                loginflag = false;
-                break;
-            }
-            
-            // Check if password matches
-            if (customers[account_index].check_passwordclass(password)) {
-                system("CLS");
-                cout << "\nLogged in successfully!" << endl;
-                cout << "Press any key to continue...";
-                getch();
-                system("CLS");
-                loginflag = true;
-                return customers[account_index];
-            } else {
-                cout << "\nIncorrect password! Please try again."<<endl;
-            }
+            cout << "No account found with this email! Try again or enter 0 to return.\n" << endl;
+            continue;
+        } else {
+            break; // Email found, proceed to password
         }
     }
-    return customers[numberofuser-startingAccountNumber];
+
+    // Password section
+    string password;
+    while (true) {
+        cout << "Enter password (or 0 to return to main menu): ";
+        password = setPassword();
+        cout << endl;
+
+        // Exit option
+        if (password == "0") {
+            loginflag = false;
+            return customers[numberofuser - startingAccountNumber]; // Return to main menu
+        }
+
+        // Check password
+        if (customers[account_index].check_passwordclass(password)) {
+            system("CLS");
+            cout << "\nLogged in successfully!" << endl;
+            cout << "Press any key to continue...";
+            getch();
+            system("CLS");
+            loginflag = true;
+            return customers[account_index];
+        } else {
+            cout << "\nIncorrect password! Try again or enter 0 to return.\n" << endl;
+        }
+    }
+
+    // Fallback return (shouldn't reach here due to loops)
+    return customers[numberofuser - startingAccountNumber];
 }
 
-void create_account()
-{
+
+void create_account() {
     cin.ignore();
-    cout << "\tCreate an account : \n" << endl ;  
+    cout << "\tCreate an account : \n" << endl;  
     string name;
     string username;
     string email;
@@ -320,122 +347,140 @@ void create_account()
     string password;
     string confirm_password;
 
-    cout<<"\tEnter your name : ";
-    getline(cin,name);
-    cout<<"\tEnter email address : ";
-    cin>>email;
+    cout << "\tEnter your name : ";
+    getline(cin, name);
+    cout << "\tEnter email address (or 0 to return to main menu): ";
+    cin >> email;
+
+    // Check if user wants to exit
+    if (email == "0") {
+        system("CLS");
+        return; // Return to main menu
+    }
+
     // Check if email already exists
     while (emailexistornot(email)) {
-        cout << "\tEmail already exists! Please enter a different email: ";
+        cout << "\tEmail already exists! Please enter a different email (or 0 to return): ";
         cin >> email;
-    }
-    email=validemailchecker(email);
-    cout<<"\tEnter phone no : ";
-    cin>>phone_no;
-    phone_no=validphonenumberchecker(phone_no);
-
-    while(true){
-        cout<<"\tEnter password : ";
-        password=setPassword();
-        cout<<endl<<"\tConfirm password : ";
-        confirm_password=setPassword();
-        if(password!=confirm_password){
+        if (email == "0") {
             system("CLS");
-            cout<<endl<<"\tPassword does not match ! Please Try again... "<<endl; 
-            continue;
+            return; // Return to main menu
         }
-        else break;
+    }
+
+    // Validate email format
+    email = validemailchecker(email);
+    if (email.empty()) { // User entered "0" during validation
+        system("CLS");
+        return; // Return to main menu
+    }
+
+    cout << "\tEnter phone no : ";
+    cin >> phone_no;
+    phone_no = validphonenumberchecker(phone_no);
+
+    while (true) {
+        cout << "\tEnter password : ";
+        password = setPassword();
+        cout << endl << "\tConfirm password : ";
+        confirm_password = setPassword();
+        if (password != confirm_password) {
+            system("CLS");
+            cout << endl << "\tPassword does not match! Please try again..." << endl;
+            continue;
+        } else {
+            break;
+        }
     }
 
     system("CLS");
     customers.push_back(Customer(name, username, phone_no, email, address, password));
     numberofuser++;
-    cout<<endl<<"\tAccount created successfully !"<<endl;
-    cout<<"\tpress any key to continue...";
+    cout << endl << "\tAccount created successfully!" << endl;
+    cout << "\tPress any key to continue...";
     getch();
     system("CLS");
-    numberofuser++;   
 }
 
 vector<Product> cart;
 
 // Define the products in each category
 vector<Product> electronics = {
-    Product("Laptop", 500, 10),
-    Product("Smartphone", 300, 20),
-    Product("Headphones", 100, 15),
-    Product("Tablet", 250, 12),
-    Product("Smartwatch", 200, 18),
-    Product("Bluetooth Speaker", 80, 25),
-    Product("Gaming Console", 400, 8),
-    Product("Wireless Mouse", 25, 30),
-    Product("Keyboard", 40, 22),
-    Product("Power Bank", 35, 35)
+    Product("Laptop", 55990, 10),
+    Product("Smartphone", 12990, 20),
+    Product("Headphones", 999, 15),
+    Product("Tablet", 23000, 12),
+    Product("Smartwatch", 1400, 18),
+    Product("Bluetooth Speaker", 1550, 25),
+    Product("Gaming Console", 44990, 8),
+    Product("Wireless Mouse", 600, 30),
+    Product("Keyboard", 650, 22),
+    Product("Power Bank", 1199, 35)
 };
 
 vector<Product> footwear = {
-    Product("Nike Shoes", 80, 30),
-    Product("Adidas Sneakers", 70, 25),
-    Product("Puma Sandals", 50, 40),
-    Product("Reebok Trainers", 75, 20),
-    Product("Vans Slip-ons", 60, 25),
-    Product("Formal Shoes", 90, 15),
-    Product("Flip Flops", 20, 50),
-    Product("Boots", 100, 10),
-    Product("Loafers", 65, 18),
-    Product("Crocs", 40, 35)
+    Product("Nike Shoes", 4950, 30),
+    Product("Adidas Sneakers", 2199, 25),
+    Product("Puma Sandals",1400 , 40),
+    Product("Reebok Trainers", 2240, 20),
+    Product("Vans Slip-ons", 3999, 25),
+    Product("Formal Shoes", 850, 15),
+    Product("Flip Flops", 300, 50),
+    Product("Boots", 600, 10),
+    Product("Loafers", 900, 18),
+    Product("Crocs", 400, 35)
 };
 
 vector<Product> clothing = {
-    Product("T-Shirt", 20, 50),
-    Product("Jeans", 40, 30),
-    Product("Jacket", 60, 20),
-    Product("Sweater", 45, 25),
-    Product("Hoodie", 50, 28),
-    Product("Shorts", 25, 40),
-    Product("Skirt", 30, 35),
-    Product("Dress", 55, 22),
-    Product("Tracksuit", 70, 15),
-    Product("Blazer", 80, 10)
+    Product("T-Shirt", 350, 50),
+    Product("Jeans", 400, 30),
+    Product("Jacket", 600, 20),
+    Product("Sweater", 700, 25),
+    Product("Hoodie", 500, 28),
+    Product("Shorts", 250, 40),
+    Product("Skirt", 300, 35),
+    Product("Dress", 550, 22),
+    Product("Tracksuit", 1000, 15),
+    Product("Blazer", 800, 10)
 };
 
 vector<Product> accessories = {
-    Product("Watch", 150, 10),
-    Product("Sunglasses", 50, 25),
-    Product("Backpack", 30, 40),
-    Product("Wallet", 25, 35),
-    Product("Belt", 20, 30),
-    Product("Cap", 15, 50),
-    Product("Scarf", 18, 45),
-    Product("Earrings", 35, 20),
-    Product("Necklace", 60, 15),
-    Product("Bracelet", 40, 18)
+    Product("Watch", 1500, 10),
+    Product("Sunglasses", 250, 25),
+    Product("Backpack", 600, 40),
+    Product("Wallet", 250, 35),
+    Product("Belt", 150, 30),
+    Product("Cap", 130, 50),
+    Product("Scarf", 110, 45),
+    Product("Earrings", 50, 20),
+    Product("Necklace", 300, 15),
+    Product("Bracelet", 200, 18)
 };
 
 vector<Product> books = {
-    Product("The Great Gatsby", 15, 100),
-    Product("1984", 12, 80),
-    Product("To Kill a Mockingbird", 14, 90),
-    Product("The Alchemist", 13, 70),
-    Product("Sapiens", 20, 50),
-    Product("Atomic Habits", 18, 60),
-    Product("Harry Potter", 25, 75),
-    Product("The Hobbit", 16, 65),
-    Product("Rich Dad Poor Dad", 17, 85),
-    Product("The Psychology of Money", 19, 55)
+    Product("The Great Gatsby", 150, 100),
+    Product("1984", 120, 80),
+    Product("To Kill a Mockingbird", 340, 90),
+    Product("The Alchemist", 260, 70),
+    Product("Sapiens", 400, 50),
+    Product("Atomic Habits", 260, 60),
+    Product("Harry Potter", 375, 75),
+    Product("The Hobbit", 400, 65),
+    Product("Rich Dad Poor Dad", 500, 85),
+    Product("The Psychology of Money", 390, 55)
 };
 
 vector<Product> sports = {
-    Product("Football", 25, 40),
-    Product("Basketball", 30, 35),
-    Product("Yoga Mat", 20, 50),
-    Product("Dumbbells (10kg)", 45, 15),
-    Product("Tennis Racket", 60, 20),
-    Product("Skipping Rope", 10, 60),
-    Product("Treadmill", 500, 5),
-    Product("Cycling Helmet", 35, 25),
-    Product("Resistance Bands", 15, 40),
-    Product("Fitness Tracker", 70, 12)
+    Product("Football", 400, 40),
+    Product("Basketball", 600, 35),
+    Product("Yoga Mat", 300, 50),
+    Product("Dumbbells (10kg)", 600, 15),
+    Product("Tennis Racket", 1099, 20),
+    Product("Skipping Rope", 325, 60),
+    Product("Treadmill", 16000, 5),
+    Product("Cycling Helmet", 1200, 25),
+    Product("Resistance Bands", 300, 40),
+    Product("Fitness Tracker", 400, 12)
 };
 
 vector<Product> health = {
@@ -470,7 +515,7 @@ void selectProduct(vector<Product>& products) {
     cout << size << endl;
     system("CLS");
         cout << left << setw(5) << "ID" << setw(35) << "Product" << setw(30) << "Price" << endl;
-        cout << "---------------------------------" << endl;
+        cout << "-------------------------------------------" << endl;
         for (int i = 0; i < size ; i++) {
             cout << setw(5) << i + 1 << setw(35) << products[i].get_name() << setw(30) << products[i].get_price() << endl;
         }
@@ -508,10 +553,11 @@ void selectProduct(vector<Product>& products) {
         for (auto &item : cart) {
             if (item.get_name() == products[choice - 1].get_name())
             {
-                if(quantity <= products[choice - 1].get_quantity()){
+                if(quantity <= products[choice - 1].get_quantity() && quantity != 0){
                     // Item already exists in cart: update quantity and price
                     item.set_quantity(item.get_quantity() + quantity);
                     item.set_price(item.get_price() + products[choice - 1].get_price() * quantity);
+                    products[choice - 1].set_quantity(products[choice - 1].get_quantity() - quantity);
                 }
                 found = true;
                 break;
@@ -520,8 +566,9 @@ void selectProduct(vector<Product>& products) {
 
         if (!found) {
             // Item does not exist in cart: add new item
-            if(quantity <= products[choice - 1].get_quantity()){
+            if(quantity <= products[choice - 1].get_quantity() && quantity != 0){
                 cart.push_back(Product(products[choice - 1].get_name(), products[choice - 1].get_price() * quantity, quantity));
+                products[choice - 1].set_quantity(products[choice - 1].get_quantity() - quantity);
             }
         }
         continue;  
@@ -533,10 +580,10 @@ void viewcart(){
     int n;
     while(true){
         
-        cout << left << setw(5) << "ID" << setw(15) << "Product" << setw(15) << "Quantity"<< setw(10) << "Price" << endl;
-        cout << "---------------------------------" << endl;
+        cout << left << setw(5) << "ID" << setw(35) << "Product" << setw(35) << "Quantity"<< setw(30) << "Price" << endl;
+        cout << "----------------------------------------------" << endl;
         for (int i = 0; i < cart.size(); i++) {
-            cout << setw(5) << i + 1 << setw(15) << cart[i].get_name() << setw(15) << cart[i].get_quantity()<< setw(10) << cart[i].get_price() << endl;
+            cout << setw(5) << i + 1 << setw(35) << cart[i].get_name() << setw(35) << cart[i].get_quantity()<< setw(30) << cart[i].get_price() << endl;
         }
         cout << "\nPress 0 to go back : " ;
         cin >> n;
@@ -607,18 +654,14 @@ void Inventory() {
 int main() {
     while (true) {
         bool loginflag = true;
-
-       
         while (!checkforlogin()) {
             create_account();
         }
 
-     
         Customer &client = login(loginflag);
         if (!loginflag) {
             continue;
         }
-
         bool flag = true; 
 
         while (flag) {
@@ -699,6 +742,7 @@ int main() {
                     viewcart();
                     break;
                 }
+                
 
 
                 case 7: {
