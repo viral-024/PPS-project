@@ -590,9 +590,17 @@ void viewcart(){
             cout << setw(5) << i + 1 << setw(35) << cart[i].get_name() << setw(35) << cart[i].get_quantity()<< setw(30) << cart[i].get_price() << endl;
         }
         cout << "\nPress 0 to go back : " ;
-        cin >> n;
-        if(n==0)
-        return;
+        while (!(cin >> n) == 0) { 
+            cout << "Invalid choice! Please enter a valid option: ";
+            cin.clear();  // Clear error flag
+            cin.ignore(1000, '\n');  // Ignore invalid input
+            if (n == 0) {
+                return;  // Exit product selection
+            }
+        }
+        if (n==0) {
+            return;  // Exit product selection
+        }
     }
     
 }
@@ -654,6 +662,93 @@ void Inventory() {
     }
 }
 
+// Helper function to restore inventory (add this to your code)
+void restoreInventory(string productName, int quantity) {
+    vector<vector<Product>*> catagories = {&electronics, &footwear, &clothing, &accessories, &books, &sports, &health, &groceries};
+    for (auto inventory : catagories) {
+        for (auto &product : *inventory) {
+            if (product.get_name() == productName) {
+                product.set_quantity(product.get_quantity() + quantity);
+                return;
+            }
+        }
+    }
+}
+
+
+void removefromcart() {
+    system("CLS");
+    if (cart.empty()) {
+        cout << "Your cart is empty!" << endl;
+        cout << "Press any key to continue...";
+        getch();
+        return;
+    }
+
+    while (true) {
+        
+        cout << left << setw(5) << "ID" << setw(35) << "Product" << setw(35) << "Quantity" << setw(30) << "Price" << endl;
+        cout << "----------------------------------------------" << endl;
+        for (int i = 0; i < cart.size(); i++) {
+            cout << setw(5) << i + 1 << setw(35) << cart[i].get_name() << setw(35) << cart[i].get_quantity() << setw(30) << cart[i].get_price() << endl;
+        }
+
+        int n;
+        cout << "\nEnter the ID of the item you want to remove from cart (or enter 0 to go back): ";
+        cin >> n;
+
+        if (n == 0) {
+            return;
+        }
+
+        // Validate ID
+        if (n < 1 || n > cart.size()) {
+            cout << "Invalid choice! Please enter a valid ID." << endl;
+            cout << "Press any key to continue...";
+            getch();
+            system("CLS");
+            continue;
+        }
+
+        int quantity;
+        cout << "Enter the quantity to remove: ";
+        cin >> quantity;
+
+        // Validate quantity
+        if (quantity < 0 || quantity > cart[n - 1].get_quantity()) {
+            cout << "Invalid quantity! Please enter a valid quantity (1-" << cart[n - 1].get_quantity() << "): ";
+            cin >> quantity;
+        }
+
+        // Calculate unit price
+        int unitPrice = cart[n - 1].get_price() / cart[n - 1].get_quantity();
+        int newQuantity = cart[n - 1].get_quantity() - quantity;
+        int newPrice = unitPrice * newQuantity;
+
+        // Update or remove item from cart
+        if (newQuantity >= 0) {
+            cart[n - 1].set_quantity(newQuantity);
+            cart[n - 1].set_price(newPrice);
+        } else {
+            cart.erase(cart.begin() + (n - 1));
+        }
+
+        restoreInventory(cart[n - 1].get_name(), quantity);
+
+        cout << "Item removed from cart successfully!" << endl;
+        cout << "Press any key to continue...";
+        getch();
+        system("CLS");
+
+        // If cart is empty, exit
+        if (cart.empty()) {
+            cout << "Your cart is now empty!" << endl;
+            cout << "Press any key to continue...";
+            getch();
+            return;
+        }
+    }
+}
 
 int main() {
     while (true) {
@@ -747,7 +842,10 @@ int main() {
                     break;
                 }
                 
-
+                case 5 : {
+                    removefromcart();
+                    break;
+                }
 
                 case 7: {
                     system("CLS");
