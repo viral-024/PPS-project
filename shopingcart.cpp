@@ -1,8 +1,6 @@
 #include<iostream>
-#include<string>
+#include<fstream>
 #include<vector>
-#include<algorithm>
-#include<cstdlib>
 #include<cstring>
 #include<conio.h>
 #include<iomanip>
@@ -10,7 +8,7 @@
 
 using namespace std; 
 
-int const startingAccountNumber=1;
+int const startingAccountNumber=1000;
 static int  numberofuser=startingAccountNumber;
 
 
@@ -136,20 +134,20 @@ class Product{
 string setPassword() {
     string password;
     while (true) {
-        password.clear(); // Clear previous input
+        password.clear();
         while (true) {
             char s = getch();
-            if (!password.empty() && s == '\b') { // Handle backspace
+            if (!password.empty() && s == '\b') {
                 cout << "\b \b";
                 password.pop_back();
-            } else if (s == '\r' || s == '\n') { // Enter key pressed
+            } else if (s == '\r' || s == '\n') {
                 if (password.empty()) {
                     cout << "\nPassword cannot be empty! Please enter a password.";
-                    break; // Break inner loop to prompt again
+                    break;
                 } else {
-                    return password; // Return valid password
+                    return password;
                 }
-            } else { // Add character to password
+            } else {
                 password += s;
                 cout << "*";
             }
@@ -157,10 +155,9 @@ string setPassword() {
     }
 }
 
-
-bool emailexistornot(string email){
-    for(int i=0;i<customers.size();i++){
-        if(customers[i].get_email()==email)
+bool emailexistornot(string email) {
+    for (int i = 0; i < customers.size(); i++) {
+        if (customers[i].get_email() == email)
             return true;
     }
     return false;
@@ -169,12 +166,9 @@ bool emailexistornot(string email){
 string validphonenumberchecker(string phoneNumber) {
     while (true) {
         bool isValid = true;
-        // Check length
-        if (phoneNumber.size() != 10||phoneNumber.empty()) {
+        if (phoneNumber.size() != 10 || phoneNumber.empty()) {
             isValid = false;
-        }
-        else {
-            // Check each character is a digit
+        } else {
             for (int i = 0; i < 10; i++) {
                 if (phoneNumber[i] < '0' || phoneNumber[i] > '9') {
                     isValid = false;
@@ -182,10 +176,8 @@ string validphonenumberchecker(string phoneNumber) {
                 }
             }
         }
-
         if (isValid) break;
-
-        cout << "You entered an invalid number..."<<endl;
+        cout << "You entered an invalid number..." << endl;
         cout << "\tEnter a valid number: ";
         cin >> phoneNumber;
     }
@@ -198,33 +190,28 @@ string validemailchecker(string email) {
         int dot = 0, at = 0;
         bool valid = true;
 
-        // Check for exit condition first
         if (email == "0") {
-            return ""; // Empty string signals exit
+            return "";
         }
-
-        // Basic checks
-        if (es < 5) { // Minimum reasonable email length (e.g., a@b.c)
+        if (es < 5) {
             valid = false;
         } else {
             for (int i = 0; i < es; i++) {
                 if (email[i] == '.') dot++;
                 if (email[i] == '@') {
                     if (i == 0 || i == es - 1 || email[i + 1] == '.' || email[i - 1] == '.') {
-                        valid = false; // @ at start/end or adjacent to dot is invalid
+                        valid = false;
                     } else {
                         at++;
                     }
                 }
             }
-            // Ensure exactly one @ and at least one dot after @
             if (at != 1 || dot < 1 || email[es - 1] == '.' || email[es - 1] == '@') {
                 valid = false;
             }
         }
-
         if (valid) {
-            return email; // Valid email
+            return email;
         } else {
             cout << "Invalid email format! (e.g., user@domain.com, or 0 to return): ";
             cin >> email;
@@ -232,36 +219,25 @@ string validemailchecker(string email) {
     }
 }
 
-bool checkforlogin()
-{
+bool checkforlogin() {
     system("CLS");
     cout << "\n\tWelCome To Our App" << "\n\n" << endl;
-    cout << "\t1 : Login an account " << endl ;
-    cout << "\t2 : Create an account " << endl ;
-    cout << "\t3 : Exit" << "\n" << endl ;
-
-    cout << "\tSelect an Option : " ;
-    while(true){
-
-        int choice ;
-        cin >> choice ;
+    cout << "\t1 : Login an account " << endl;
+    cout << "\t2 : Create an account " << endl;
+    cout << "\t3 : Exit" << "\n" << endl;
+    cout << "\tSelect an Option : ";
+    while (true) {
+        int choice;
+        cin >> choice;
         system("CLS");
-
-        if(choice == 1)
-            return true ;
-        else if(choice == 2)
-            return false ;
-        else if(choice == 3)
-            exit(0);
-        else 
-            cout << "\tSelect valid option : " ;
+        if (choice == 1) return true;
+        else if (choice == 2) return false;
+        else if (choice == 3) exit(0);
+        else cout << "\tSelect valid option : ";
     }
-
 }
 
-
-
-Customer &login(bool &loginflag) {
+Customer& login(bool& loginflag) {
     system("CLS");
     cout << "Login Section:\n\n";
 
@@ -272,28 +248,23 @@ Customer &login(bool &loginflag) {
         cout << "Enter email address (or 0 to return to main menu): ";
         cin >> email;
 
-        // Exit option directly from initial prompt
         if (email == "0") {
             loginflag = false;
-            return customers[numberofuser - startingAccountNumber]; // Return to main menu
+            return customers[numberofuser - startingAccountNumber];
         }
-
-        // Check for empty input
         if (email.empty()) {
             cout << "\nPlease enter an email address!" << endl;
             continue;
         }
 
-        // Validate email format
         email = validemailchecker(email);
-        if (email.empty()) { // User entered "0" during validation
+        if (email.empty()) {
             loginflag = false;
-            return customers[numberofuser - startingAccountNumber]; // Return to main menu
+            return customers[numberofuser - startingAccountNumber];
         }
 
-        // Check if email exists
         account_index = -1;
-        for (int i = 0; i < numberofuser - startingAccountNumber; i++) {
+        for (int i = 0; i < customers.size(); i++) {
             if (email == customers[i].get_email()) {
                 account_index = i;
                 break;
@@ -304,24 +275,21 @@ Customer &login(bool &loginflag) {
             cout << "No account found with this email! Try again or enter 0 to return.\n" << endl;
             continue;
         } else {
-            break; // Email found, proceed to password
+            break;
         }
     }
 
-    // Password section
     string password;
     while (true) {
         cout << "Enter password (or 0 to return to main menu): ";
         password = setPassword();
         cout << endl;
 
-        // Exit option
         if (password == "0") {
             loginflag = false;
-            return customers[numberofuser - startingAccountNumber]; // Return to main menu
+            return customers[numberofuser - startingAccountNumber];
         }
 
-        // Check password
         if (customers[account_index].check_passwordclass(password)) {
             system("CLS");
             cout << "\nLogged in successfully!" << endl;
@@ -334,49 +302,37 @@ Customer &login(bool &loginflag) {
             cout << "Incorrect password! Try again or enter 0 to return." << endl;
         }
     }
-
-    // Fallback return (shouldn't reach here due to loops)
     return customers[numberofuser - startingAccountNumber];
 }
 
-
 void create_account() {
     cin.ignore();
-    cout << "\tCreate an account : \n" << endl;  
-    string name;
-    string username;
-    string email;
-    string phone_no;
-    string address;
-    string password;
-    string confirm_password;
+    cout << "\tCreate an account : \n" << endl;
+    string name, username, email, phone_no, address, password, confirm_password;
 
     cout << "\tEnter your name : ";
     getline(cin, name);
     cout << "\tEnter email address (or 0 to return to main menu): ";
     cin >> email;
 
-    // Check if user wants to exit
     if (email == "0") {
         system("CLS");
-        return; // Return to main menu
+        return;
     }
 
-    // Check if email already exists
     while (emailexistornot(email)) {
         cout << "\tEmail already exists! Please enter a different email (or 0 to return): ";
         cin >> email;
         if (email == "0") {
             system("CLS");
-            return; // Return to main menu
+            return;
         }
     }
 
-    // Validate email format
     email = validemailchecker(email);
-    if (email.empty()) { // User entered "0" during validation
+    if (email.empty()) {
         system("CLS");
-        return; // Return to main menu
+        return;
     }
 
     cout << "\tEnter phone no : ";
@@ -397,9 +353,26 @@ void create_account() {
         }
     }
 
-    system("CLS");
+    // Add to vector
     customers.push_back(Customer(name, username, phone_no, email, address, password));
     numberofuser++;
+
+    // Write to file
+    ofstream file("customers.txt", ios::app); // Open in append mode
+    if (file.is_open()) {
+        file << "name: " << name << endl;
+        file << "username: " << username << endl;
+        file << "phone_no: " << phone_no << endl;
+        file << "email: " << email << endl;
+        file << "address: " << address << endl;
+        file << "password: " << password << endl;
+        file << endl; // Blank line to separate customers
+        file.close();
+    } else {
+        cout << "Error: Could not save account to file!" << endl;
+    }
+
+    system("CLS");
     cout << endl << "\tAccount created successfully!" << endl;
     cout << "\tPress any key to continue...";
     getch();
@@ -488,29 +461,29 @@ vector<Product> sports = {
 };
 
 vector<Product> health = {
-    Product("Vitamins (60 tabs)", 20, 30),
-    Product("First Aid Kit", 25, 20),
-    Product("Thermometer", 15, 25),
-    Product("Blood Pressure Monitor", 50, 10),
-    Product("Hand Sanitizer", 5, 100),
-    Product("Face Masks (50 pcs)", 10, 75),
-    Product("Pain Relief Spray", 8, 40),
-    Product("Cough Syrup", 6, 50),
-    Product("Disinfectant Wipes", 7, 60),
-    Product("Bandages", 3, 80)
+    Product("Vitamins (60 tabs)", 300, 30),
+    Product("First Aid Kit", 2000, 20),
+    Product("Thermometer", 165, 25),
+    Product("Blood Pressure Monitor", 1370, 10),
+    Product("Hand Sanitizer", 35, 100),
+    Product("Face Masks (50 pcs)", 250, 75),
+    Product("Pain Relief Spray", 400, 40),
+    Product("Cough Syrup", 120, 50),
+    Product("Disinfectant Wipes", 50, 60),
+    Product("Bandages", 5, 80)
 };
 
 vector<Product> groceries = {
-    Product("Rice (5kg)", 20, 50),
-    Product("Sugar (1kg)", 2, 100),
-    Product("Flour (2kg)", 3, 80),
-    Product("Cooking Oil (1L)", 5, 60),
-    Product("Salt (1kg)", 1, 150),
-    Product("Pasta (500g)", 2, 120),
-    Product("Canned Beans", 1, 200),
-    Product("Frozen Vegetables", 3, 90),
-    Product("Spices Set", 10, 40),
-    Product("Tea Bags (100 pcs)", 5, 70)
+    Product("Rice (5kg)", 350, 50),
+    Product("Sugar (1kg)", 40, 100),
+    Product("Flour (2kg)", 100, 80),
+    Product("Cooking Oil (1L)", 100, 60),
+    Product("Salt (1kg)", 10, 150),
+    Product("Pasta (500g)", 70, 120),
+    Product("Canned Beans", 175, 200),
+    Product("Frozen Vegetables", 140, 90),
+    Product("Spices Set", 400, 40),
+    Product("Tea Bags (100 pcs)", 220, 70)
 };
 
 void selectProduct(vector<Product>& products) {
@@ -715,7 +688,7 @@ void removefromcart() {
         cin >> quantity;
 
         // Validate quantity
-        if (quantity < 0 || quantity > cart[n - 1].get_quantity()) {
+        if (quantity <= 0 || quantity > cart[n - 1].get_quantity()) {
             cout << "Invalid quantity! Please enter a valid quantity (1-" << cart[n - 1].get_quantity() << "): ";
             cin >> quantity;
         }
@@ -726,7 +699,7 @@ void removefromcart() {
         int newPrice = unitPrice * newQuantity;
 
         // Update or remove item from cart
-        if (newQuantity >= 0) {
+        if (newQuantity > 0) {
             cart[n - 1].set_quantity(newQuantity);
             cart[n - 1].set_price(newPrice);
         } else {
@@ -750,6 +723,11 @@ void removefromcart() {
     }
 }
 
+
+
+
+
+
 int main() {
     while (true) {
         bool loginflag = true;
@@ -772,7 +750,7 @@ int main() {
             cout << "3 : view inventory" << endl;
             cout << "4 : view cart" << endl;
             cout << "5 : Remove from cart" << endl;
-            cout << "6 : Checkout" << endl;
+            cout << "6 : Bill" << endl;
             cout << "7 : Logout" << endl;          
             cout << "Enter your choice: ";
 
@@ -846,6 +824,7 @@ int main() {
                     removefromcart();
                     break;
                 }
+                
 
                 case 7: {
                     system("CLS");
