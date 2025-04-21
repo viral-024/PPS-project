@@ -1,135 +1,74 @@
 #include<iostream>
 #include<fstream>
+#include<stdexcept>
 #include<vector>
-#include<cstring>
 #include<conio.h>
 #include<iomanip>
 #include<windows.h>
 
 using namespace std; 
 
-int const startingAccountNumber=1000;
-static int  numberofuser=startingAccountNumber;
+int const startingAccountNumber = 1000;
+static int numberofuser = startingAccountNumber;
 
+class Customer {
+    string name;
+    string username;
+    string phone_no;
+    string email;
+    string address;
+    string password;
+    int billNumber; 
 
-class Customer{
+public:
+    Customer() : billNumber(1000) {}
+    Customer(string name, string username, string phone_no, string email, string address, string password)
+        : name(name), username(username), phone_no(phone_no), email(email), address(address), password(password), billNumber(1000) {}
 
-    string name ;
-    string username ;
-    string phone_no ;
-    string email ;
-    string address ;
-    string password ;
+    string get_name() const{ return name; }
+    string get_username() const{ return username; }
+    string get_password() const{ return password; }
+    string get_email() const{ return email; }
+    string get_address() const{ return address; }
+    string get_phoneno() const{ return phone_no; }
+    int get_billNumber() const{ return billNumber; }
 
-    public :
-
-    Customer(){}
-
-    Customer (string name ,string username ,string phone_no ,string email ,string address ,string password ){
-        this->name = name ;
-        this->username = username ;
-        this->phone_no = phone_no ;
-        this->email = email ;
-        this->address = address ;
-        this->password = password ;
-    }
-
-    string get_name(){
-        return name ;
-    }
-
-    string get_username(){
-        return username ;
-    }
-
-    string get_password(){
-        return password ;
-    }
-
-    string get_email(){
-        return email ;
-    }
-
-    string get_address(){
-        return address ;
-    }
-
-    string get_phoneno(){
-        return phone_no ;
-    }
-
-    void update_username(string username){
-        this->username=username;
-    }
-
-    void update_phoneno(string phone_no){
-        this->phone_no=phone_no;
-    }
-
-    void update_email(string email){
-        this->email=email;
-    }
-
-    void update_address(string address){
-        this->address=address;
-    }
-    
-    void update_password(string password){
-        this->password=password;
-    }
-
-    void update_name(string name){
-        this->name=name;
-    }
+    void update_username(string username) { this->username = username; }
+    void update_phoneno(string phone_no) { this->phone_no = phone_no; }
+    void update_email(string email) { this->email = email; }
+    void update_address(string address) { this->address = address; }
+    void update_password(string password) { this->password = password; }
+    void update_name(string name) { this->name = name; }
+    void increment_billNumber() { billNumber++; }
 
     bool check_passwordclass(string password) {
-        if(password==this->password)
-            return true;
-        else    
-            return false;
+        return password == this->password;
     }
-
-    void view_profile(){
-        cout << "\tname : " << name << endl ;
-        cout << "\tEmail : " << email << endl ;
-        cout << "\tphone_no : " << phone_no << endl ;
+    void view_profile() {
+        cout << "\tname : " << name << endl;
+        cout << "\tEmail : " << email << endl;
+        cout << "\tphone_no : " << phone_no << endl;
     }
-
 };
 vector<Customer> customers;
 
-class Product{
+class Product {
     string name;
     int price;
     int quantity;
-    public:
-    Product(){}
-    Product(string name,int price,int quantity){
-        this->name=name;
-        this->price=price;
-        this->quantity=quantity;
-    }
-    string get_name(){
-        return name;
-    }
-    int get_price(){
-        return price;
-    }
-    int get_quantity(){
-        return quantity;
-    }
 
-    void set_price(int price){
-        this->price=price;
-    }
-    void set_name(string name){
-        this->name=name;
-    }
-    void set_quantity(int quantity){
-        this->quantity=quantity;
-    }
+public:
+    Product() {}
+    Product(string name, int price, int quantity) : name(name), price(price), quantity(quantity) {}
+
+    string get_name() { return name; }
+    int get_price() { return price; }
+    int get_quantity() { return quantity; }
+
+    void set_price(int price) { this->price = price; }
+    void set_name(string name) { this->name = name; }
+    void set_quantity(int quantity) { this->quantity = quantity; }
 };
-
 
 string setPassword() {
     string password;
@@ -155,9 +94,70 @@ string setPassword() {
     }
 }
 
+void saveCustomers() {
+
+    try {
+        ofstream file("customers.txt");
+        if (!file.is_open()) {
+            throw runtime_error("Unable to open customers.txt for writing");
+        }
+        for (const auto& customer : customers) {
+            file << "name: " << customer.get_name() << endl;
+            file << "username: " << customer.get_username() << endl;
+            file << "phone_no: " << customer.get_phoneno() << endl;
+            file << "email: " << customer.get_email() << endl;
+            file << "address: " << customer.get_address() << endl;
+            file << "password: " << customer.get_password() << endl;
+            file << "billNumber: " << customer.get_billNumber() << endl;
+            file << endl;
+            // Check if write operation failed
+            if (file.fail()) {
+                throw runtime_error("Error writing to customers.txt");
+            }
+        }
+        file.close();
+        if (file.fail()) {
+            throw runtime_error("Error closing customers.txt");
+        }
+    }
+    catch (const std::runtime_error& e) {
+        cout << "Error: " << e.what() << endl;
+    }
+    catch (const std::exception& e) {
+        cout << "Unexpected error: " << e.what() << endl;
+    }
+    catch (...) {
+        cout << "Unknown error occurred while saving customers" << endl;
+    }
+}
+
+void loadCustomers() {
+    ifstream file("customers.txt");
+    string line, name, username, phone_no, email, address, password;
+    int billNumber = 1000;
+
+    while (getline(file, line)) {
+        if (line.find("name: ") == 0) name = line.substr(6);
+        else if (line.find("username: ") == 0) username = line.substr(10);
+        else if (line.find("phone_no: ") == 0) phone_no = line.substr(10);
+        else if (line.find("email: ") == 0) email = line.substr(7);
+        else if (line.find("address: ") == 0) address = line.substr(9);
+        else if (line.find("password: ") == 0) password = line.substr(10);
+        else if (line.find("billNumber: ") == 0) billNumber = stoi(line.substr(12));
+        else if (line.empty() && !email.empty()) {
+            Customer customer(name, username, phone_no, email, address, password);
+            customer.increment_billNumber();
+            customers.push_back(customer);
+            name = username = phone_no = email = address = password = "";
+            billNumber = 1000;
+        }
+    }
+    file.close();
+}
+
 bool emailexistornot(string email) {
-    for (int i = 0; i < customers.size(); i++) {
-        if (customers[i].get_email() == email)
+    for (const auto& customer : customers) {
+        if (customer.get_email() == email)
             return true;
     }
     return false;
@@ -169,8 +169,8 @@ string validphonenumberchecker(string phoneNumber) {
         if (phoneNumber.size() != 10 || phoneNumber.empty()) {
             isValid = false;
         } else {
-            for (int i = 0; i < 10; i++) {
-                if (phoneNumber[i] < '0' || phoneNumber[i] > '9') {
+            for (char c : phoneNumber) {
+                if (c < '0' || c > '9') {
                     isValid = false;
                     break;
                 }
@@ -221,7 +221,7 @@ string validemailchecker(string email) {
 
 bool checkforlogin() {
     system("CLS");
-    cout << "\n\tWelCome To Our App" << "\n\n" << endl;
+    cout << "\n\tWelcome To ShopSphere\n\n" << endl;
     cout << "\t1 : Login an account " << endl;
     cout << "\t2 : Create an account " << endl;
     cout << "\t3 : Exit" << "\n" << endl;
@@ -353,30 +353,78 @@ void create_account() {
         }
     }
 
-    // Add to vector
     customers.push_back(Customer(name, username, phone_no, email, address, password));
     numberofuser++;
-
-    // Write to file
-    ofstream file("customers.txt", ios::app); // Open in append mode
-    if (file.is_open()) {
-        file << "name: " << name << endl;
-        file << "username: " << username << endl;
-        file << "phone_no: " << phone_no << endl;
-        file << "email: " << email << endl;
-        file << "address: " << address << endl;
-        file << "password: " << password << endl;
-        file << endl; // Blank line to separate customers
-        file.close();
-    } else {
-        cout << "Error: Could not save account to file!" << endl;
-    }
+    saveCustomers();
 
     system("CLS");
     cout << endl << "\tAccount created successfully!" << endl;
     cout << "\tPress any key to continue...";
     getch();
     system("CLS");
+}
+
+void UpdateProfile(Customer& customer) {
+    system("CLS");
+    cout << "\tUpdate Profile Section:\n" << endl;
+    cout << "\t1 : Update Name" << endl;
+    cout << "\t2 : Update Phone Number" << endl;
+    cout << "\t3 : Update Email" << endl;
+    cout << "\t4 : Update Password" << endl;
+    cout << "\t5 : Go Back" << endl;
+
+    int choice;
+    cout << "\tSelect an option: ";
+    cin >> choice;
+
+    switch (choice) {
+        case 1: {
+            string name;
+            cout << "\tEnter new name: ";
+            cin.ignore();
+            getline(cin, name);
+            customer.update_name(name);
+            break;
+        }
+        case 2: {
+            string phone_no;
+            cout << "\tEnter new phone number: ";
+            cin >> phone_no;
+            customer.update_phoneno(phone_no);
+            break;
+        }
+        case 3: {
+            string email;
+            cout << "\tEnter new email address: ";
+            cin >> email;
+            customer.update_email(email);
+            break;
+        }
+        case 4: {
+            string password, confirm_password;
+            while (true) {
+                cout << "\tEnter new password: ";
+                password = setPassword();
+                cout << endl << "\tConfirm new password: ";
+                confirm_password = setPassword();
+                if (password != confirm_password) {
+                    system("CLS");
+                    cout << endl << "\tPasswords do not match! Please try again..." << endl;
+                    continue;
+                } else {
+                    customer.update_password(password);
+                    break;
+                }
+            }
+            break;
+        }
+        case 5:
+            return;
+        default:
+            cout << "Invalid choice! Please try again." << endl;
+    }
+
+    saveCustomers();
 }
 
 vector<Product> cart;
@@ -552,34 +600,6 @@ void selectProduct(vector<Product>& products) {
     }
 }
 
-void viewcart(){
-    system("CLS");
-    int n;
-    while(true){
-        
-        cout << left << setw(5) << "ID" << setw(35) << "Product" << setw(35) << "Quantity"<< setw(30) << "Price" << endl;
-        cout << "----------------------------------------------" << endl;
-        for (int i = 0; i < cart.size(); i++) {
-            cout << setw(5) << i + 1 << setw(35) << cart[i].get_name() << setw(35) << cart[i].get_quantity()<< setw(30) << cart[i].get_price() << endl;
-        }
-        cout << "\nPress 0 to go back : " ;
-        while (!(cin >> n) == 0) { 
-            cout << "Invalid choice! Please enter a valid option: ";
-            cin.clear();  // Clear error flag
-            cin.ignore(1000, '\n');  // Ignore invalid input
-            if (n == 0) {
-                return;  // Exit product selection
-            }
-        }
-        if (n==0) {
-            return;  // Exit product selection
-        }
-    }
-    
-}
-
-
-
 void Inventory() {
     while (true) {
         system("CLS");
@@ -630,12 +650,12 @@ void Inventory() {
                 selectProduct(groceries); 
                 break;    
             case 0: 
-                return;  // Exit inventory and return to the main menu
+                return;  
         }
     }
 }
 
-// Helper function to restore inventory (add this to your code)
+// Helper function to restore inventory 
 void restoreInventory(string productName, int quantity) {
     vector<vector<Product>*> catagories = {&electronics, &footwear, &clothing, &accessories, &books, &sports, &health, &groceries};
     for (auto inventory : catagories) {
@@ -648,6 +668,50 @@ void restoreInventory(string productName, int quantity) {
     }
 }
 
+ostream& tableHeader(ostream& ob) {
+    ob << left << setw(5) << "ID" 
+       << setw(35) << "Product" 
+       << setw(15) << "Quantity" 
+       << setw(15) << "Unit Price" 
+       << setw(15) << "Total Price" << endl;
+    return ob;
+}
+
+ostream& tableSeparator(ostream& ob) {
+    ob << "------------------------------------------------------------" << endl;
+    return ob;
+}
+
+void viewcart() {
+    system("CLS");
+    if (cart.empty()) {
+        cout << "Your cart is empty!" << endl;
+        cout << "Press any key to continue...";
+        getch();
+        return;
+    }
+
+    cout << "========== Your Cart ==========" << endl << endl;
+    cout << tableHeader << tableSeparator;
+    for (int i = 0; i < cart.size(); i++) {
+        int unitPrice = cart[i].get_price() / cart[i].get_quantity();
+        int totalPrice = cart[i].get_price();
+        cout << left << setw(5) << (i + 1) 
+             << setw(35) << cart[i].get_name() 
+             << setw(15) << cart[i].get_quantity() 
+             << setw(15) << unitPrice 
+             << setw(15) << totalPrice << endl;
+    }
+    cout << tableSeparator;
+
+    cout << "\nPress 0 to go back: ";
+    int input;
+    while (!(cin >> input) || input != 0) {
+        cout << "Invalid input! Please press 0 to go back: ";
+        cin.clear();
+        cin.ignore(1000, '\n');
+    }
+}
 
 void removefromcart() {
     system("CLS");
@@ -659,46 +723,49 @@ void removefromcart() {
     }
 
     while (true) {
-        
-        cout << left << setw(5) << "ID" << setw(35) << "Product" << setw(35) << "Quantity" << setw(30) << "Price" << endl;
-        cout << "----------------------------------------------" << endl;
+        cout << "========== Remove from Cart ==========" << endl << endl;
+        cout << tableHeader << tableSeparator;
         for (int i = 0; i < cart.size(); i++) {
-            cout << setw(5) << i + 1 << setw(35) << cart[i].get_name() << setw(35) << cart[i].get_quantity() << setw(30) << cart[i].get_price() << endl;
+            int unitPrice = cart[i].get_price() / cart[i].get_quantity();
+            int totalPrice = cart[i].get_price();
+            cout << left << setw(5) << (i + 1) 
+                 << setw(35) << cart[i].get_name() 
+                 << setw(15) << cart[i].get_quantity() 
+                 << setw(15) << unitPrice 
+                 << setw(15) << totalPrice << endl;
         }
+        cout << tableSeparator;
 
+        cout << "\nEnter the ID of the item to remove (or 0 to go back): ";
         int n;
-        cout << "\nEnter the ID of the item you want to remove from cart (or enter 0 to go back): ";
         cin >> n;
 
         if (n == 0) {
+            system("CLS");
             return;
         }
 
-        // Validate ID
         if (n < 1 || n > cart.size()) {
-            cout << "Invalid choice! Please enter a valid ID." << endl;
+            cout << "Invalid ID! Please enter a valid ID." << endl;
             cout << "Press any key to continue...";
             getch();
             system("CLS");
             continue;
         }
 
-        int quantity;
         cout << "Enter the quantity to remove: ";
-        cin >> quantity;
-
-        // Validate quantity
-        if (quantity <= 0 || quantity > cart[n - 1].get_quantity()) {
-            cout << "Invalid quantity! Please enter a valid quantity (1-" << cart[n - 1].get_quantity() << "): ";
-            cin >> quantity;
+        int quantity;
+        while (!(cin >> quantity) || quantity <= 0 || quantity > cart[n - 1].get_quantity()) {
+            cout << "Invalid quantity! Please enter a value between 1 and " 
+                 << cart[n - 1].get_quantity() << ": ";
+            cin.clear();
+            cin.ignore(1000, '\n');
         }
 
-        // Calculate unit price
         int unitPrice = cart[n - 1].get_price() / cart[n - 1].get_quantity();
         int newQuantity = cart[n - 1].get_quantity() - quantity;
         int newPrice = unitPrice * newQuantity;
 
-        // Update or remove item from cart
         if (newQuantity > 0) {
             cart[n - 1].set_quantity(newQuantity);
             cart[n - 1].set_price(newPrice);
@@ -708,12 +775,11 @@ void removefromcart() {
 
         restoreInventory(cart[n - 1].get_name(), quantity);
 
-        cout << "Item removed from cart successfully!" << endl;
+        cout << "Item removed successfully!" << endl;
         cout << "Press any key to continue...";
         getch();
         system("CLS");
 
-        // If cart is empty, exit
         if (cart.empty()) {
             cout << "Your cart is now empty!" << endl;
             cout << "Press any key to continue...";
@@ -723,23 +789,98 @@ void removefromcart() {
     }
 }
 
+void bill(Customer& customer) {
+    system("CLS");
+    if (cart.empty()) {
+        cout << "Your cart is empty!" << endl;
+        cout << "Press any key to continue...";
+        getch();
+        return;
+    }
 
+    int billNumber = customer.get_billNumber();
+    time_t now = time(0);
+    string timestamp = ctime(&now);
+    timestamp.pop_back();
 
+    cout << "===================== ShopSphere =====================" << endl;
+    cout << "Bill Number: " << billNumber << endl;
+    cout << "Date: " << timestamp << endl;
+    cout << "-----------------------------------------------------------" << endl;
+    cout << "Customer Details:" << endl;
+    cout << "Name: " << customer.get_name() << endl;
+    cout << "Email: " << customer.get_email() << endl;
+    cout << "Phone: " << (customer.get_phoneno().empty() ? "Not provided" : customer.get_phoneno()) << endl;
+    cout << "===========================================================" << endl << endl;
 
+    cout << tableHeader << tableSeparator;
+    int subtotal = 0;
+    int totalItems = 0;
+    for (int i = 0; i < cart.size(); i++) {
+        int unitPrice = cart[i].get_price() / cart[i].get_quantity();
+        int totalPrice = cart[i].get_price();
+        subtotal += totalPrice;
+        totalItems += cart[i].get_quantity();
+        cout << left << setw(5) << (i + 1) 
+             << setw(35) << cart[i].get_name() 
+             << setw(15) << cart[i].get_quantity() 
+             << setw(15) << unitPrice 
+             << setw(15) << totalPrice << endl;
+    }
+    cout << tableSeparator;
 
+    int discount = 0;
+    if (subtotal > 20000) {
+        discount = static_cast<int>(subtotal * 0.10);
+    } else if (subtotal > 12000) {
+        discount = static_cast<int>(subtotal * 0.75);
+    }
+    int grandTotal = subtotal - discount;
+
+    cout << left << setw(50) << "Total Items: " << totalItems << endl;
+    cout << setw(50) << "Subtotal: " << subtotal << endl;
+    if (discount > 0) {
+        cout << setw(50) << "Discount: " << discount << endl;
+    }
+    cout << setw(50) << "Grand Total: " << grandTotal << endl;
+    cout << setw(50) << "Payment Method: Paid via Cash" << endl;
+    cout << "===========================================================" << endl << endl;
+
+    cout << "Options:" << endl;
+    cout << "1 : Confirm Purchase" << endl;
+    cout << "2 : Return to Main Menu" << endl;
+    cout << "Enter your choice: ";
+
+    int choice;
+    while (!(cin >> choice) || (choice < 1 || choice > 2)) {
+        cout << "Invalid choice! Please enter 1 or 2: ";
+        cin.clear();
+        cin.ignore(1000, '\n');
+    }
+
+    if (choice == 1) {
+        customer.increment_billNumber();
+        cart.clear();
+        saveCustomers();
+        cout << "\nPurchase confirmed! Thank you for shopping with ShopSphere!" << endl;
+        cout << "Press any key to continue...";
+        getch();
+    }
+}
 
 int main() {
+    loadCustomers();
     while (true) {
         bool loginflag = true;
         while (!checkforlogin()) {
             create_account();
         }
 
-        Customer &client = login(loginflag);
+        Customer& client = login(loginflag);
         if (!loginflag) {
             continue;
         }
-        bool flag = true; 
+        bool flag = true;
 
         while (flag) {
             system("CLS");
@@ -747,16 +888,16 @@ int main() {
             cout << "\nSelect an option:" << endl;
             cout << "1 : View Profile" << endl;
             cout << "2 : Update Profile" << endl;
-            cout << "3 : view inventory" << endl;
-            cout << "4 : view cart" << endl;
-            cout << "5 : Remove from cart" << endl;
+            cout << "3 : View Inventory" << endl;
+            cout << "4 : View Cart" << endl;
+            cout << "5 : Remove from Cart" << endl;
             cout << "6 : Bill" << endl;
-            cout << "7 : Logout" << endl;          
+            cout << "7 : Logout" << endl;
             cout << "Enter your choice: ";
 
             int choice;
             cin >> choice;
-            cin.ignore(); 
+            cin.ignore();
 
             switch (choice) {
                 case 1: {
@@ -766,81 +907,39 @@ int main() {
                     getch();
                     break;
                 }
-
                 case 2: {
-                    system("CLS");
-                    cout << "\nWhich field would you like to update?" << endl;
-                    cout << "1 : Update Email" << endl;
-                    cout << "2 : Update Phone Number" << endl;
-                    cout << "3 : Update Password" << endl;
-                    cout << "Enter your choice: ";
-                    int updateChoice;
-                    cin >> updateChoice;
-                    cin.ignore(); 
-
-                    switch (updateChoice) {
-                        case 1: {
-                            string newValue;
-                            cout << "Enter new email: ";
-                            cin >> newValue;
-                            client.update_email(newValue);
-                            cout << "\nEmail updated successfully!" << endl;
-                            break;
-                        }
-                        case 2: {
-                            string newValue;
-                            cout << "Enter new phone number: ";
-                            cin >> newValue;
-                            client.update_phoneno(newValue);
-                            cout << "\nPhone number updated successfully!" << endl;
-                            break;
-                        }
-                        case 3: {
-                            string newValue;
-                            cout << "Enter new password: ";
-                            newValue = setPassword(); 
-                            client.update_password(newValue);
-                            cout << "\nPassword updated successfully!" << endl;
-                            break;
-                        }
-                        default:
-                            cout << "Invalid option!" << endl;
-                    }
-                    cout << "Press any key to continue...";
-                    getch();
+                    UpdateProfile(client);
                     break;
                 }
-                case 3 : {
+                case 3: {
                     Inventory();
-                    break ;
+                    break;
                 }
-
-                case 4 : {
+                case 4: {
                     viewcart();
                     break;
                 }
-                
-                case 5 : {
+                case 5: {
                     removefromcart();
                     break;
                 }
-                
-
+                case 6: {
+                    bill(client);
+                    break;
+                }
                 case 7: {
                     system("CLS");
                     cout << "Logging out..." << endl;
                     cout << "Press any key to continue...";
                     getch();
-                    flag = false; 
+                    flag = false;
                     break;
                 }
-
                 default:
                     cout << "Invalid choice, please try again." << endl;
                     break;
             }
         }
     }
-
     return 0;
 }
