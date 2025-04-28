@@ -5,11 +5,13 @@
 #include<conio.h>
 #include<iomanip>
 #include<windows.h>
+#include "termcolor.hpp"
 
 using namespace std; 
 
 int const startingAccountNumber = 1000;
 static int numberofuser = startingAccountNumber;
+static int billNumber = 1000;
 
 class Customer {
     string name;
@@ -23,7 +25,7 @@ class Customer {
 public:
     Customer() : billNumber(1000) {}
     Customer(string name, string username, string phone_no, string email, string address, string password)
-        : name(name), username(username), phone_no(phone_no), email(email), address(address), password(password), billNumber(1000) {}
+        : name(name), username(username), phone_no(phone_no), email(email), address(address), password(password) {}
 
     string get_name() const{ return name; }
     string get_username() const{ return username; }
@@ -31,7 +33,6 @@ public:
     string get_email() const{ return email; }
     string get_address() const{ return address; }
     string get_phoneno() const{ return phone_no; }
-    int get_billNumber() const{ return billNumber; }
 
     void update_username(string username) { this->username = username; }
     void update_phoneno(string phone_no) { this->phone_no = phone_no; }
@@ -39,7 +40,6 @@ public:
     void update_address(string address) { this->address = address; }
     void update_password(string password) { this->password = password; }
     void update_name(string name) { this->name = name; }
-    void increment_billNumber() { billNumber++; }
 
     bool check_passwordclass(string password) {
         return password == this->password;
@@ -81,7 +81,7 @@ string setPassword() {
                 password.pop_back();
             } else if (s == '\r' || s == '\n') {
                 if (password.empty()) {
-                    cout << "\nPassword cannot be empty! Please enter a password.";
+                    cout << "\nPassword cannot be empty! Please enter a password." ;
                     break;
                 } else {
                     return password;
@@ -108,7 +108,6 @@ void saveCustomers() {
             file << "email: " << customer.get_email() << endl;
             file << "address: " << customer.get_address() << endl;
             file << "password: " << customer.get_password() << endl;
-            file << "billNumber: " << customer.get_billNumber() << endl;
             file << endl;
             // Check if write operation failed
             if (file.fail()) {
@@ -146,7 +145,7 @@ void loadCustomers() {
         else if (line.find("billNumber: ") == 0) billNumber = stoi(line.substr(12));
         else if (line.empty() && !email.empty()) {
             Customer customer(name, username, phone_no, email, address, password);
-            customer.increment_billNumber();
+            billNumber++;
             customers.push_back(customer);
             name = username = phone_no = email = address = password = "";
             billNumber = 1000;
@@ -177,9 +176,12 @@ string validphonenumberchecker(string phoneNumber) {
             }
         }
         if (isValid) break;
+        cout << termcolor::red;
         cout << "You entered an invalid number..." << endl;
+        cout << termcolor::bright_cyan;
         cout << "\tEnter a valid number: ";
         cin >> phoneNumber;
+        cout << termcolor::reset;
     }
     return phoneNumber;
 }
@@ -210,22 +212,28 @@ string validemailchecker(string email) {
                 valid = false;
             }
         }
+        
         if (valid) {
             return email;
         } else {
+            cout << termcolor::red;
             cout << "Invalid email format! (e.g., user@domain.com, or 0 to return): ";
+            cout << termcolor::bright_cyan;
             cin >> email;
+            cout << termcolor::reset;
         }
     }
 }
 
 bool checkforlogin() {
     system("CLS");
+    cout << termcolor::magenta << termcolor::bold;
     cout << "\n\tWelcome To ShopSphere\n\n" << endl;
     cout << "\t1 : Login an account " << endl;
     cout << "\t2 : Create an account " << endl;
     cout << "\t3 : Exit" << "\n" << endl;
     cout << "\tSelect an Option : ";
+    cout << termcolor::reset;
     while (true) {
         int choice;
         cin >> choice;
@@ -239,12 +247,16 @@ bool checkforlogin() {
 
 Customer& login(bool& loginflag) {
     system("CLS");
+    cout << termcolor::bright_cyan << termcolor::bold;
     cout << "Login Section:\n\n";
+
 
     string email;
     int account_index = -1;
 
     while (true) {
+        cout << termcolor::bright_cyan << termcolor::bold;
+
         cout << "Enter email address (or 0 to return to main menu): ";
         cin >> email;
 
@@ -253,7 +265,9 @@ Customer& login(bool& loginflag) {
             return customers[numberofuser - startingAccountNumber];
         }
         if (email.empty()) {
+            cout << termcolor::red;
             cout << "\nPlease enter an email address!" << endl;
+            cout << termcolor::reset;
             continue;
         }
 
@@ -272,7 +286,9 @@ Customer& login(bool& loginflag) {
         }
 
         if (account_index == -1) {
+            cout << termcolor::red;
             cout << "No account found with this email! Try again or enter 0 to return.\n" << endl;
+            cout << termcolor::reset;
             continue;
         } else {
             break;
@@ -281,6 +297,7 @@ Customer& login(bool& loginflag) {
 
     string password;
     while (true) {
+        cout << termcolor::bright_cyan << termcolor::bold;
         cout << "Enter password (or 0 to return to main menu): ";
         password = setPassword();
         cout << endl;
@@ -299,14 +316,18 @@ Customer& login(bool& loginflag) {
             loginflag = true;
             return customers[account_index];
         } else {
-            cout << "Incorrect password! Try again or enter 0 to return." << endl;
+            cout << termcolor::red;
+            cout << "Incorrect password! Try again or enter 0 to return.\n" << endl;
+            cout << termcolor::reset;
         }
     }
+    cout << termcolor::reset;
     return customers[numberofuser - startingAccountNumber];
 }
 
 void create_account() {
     cin.ignore();
+    cout << termcolor::bright_cyan;
     cout << "\tCreate an account : \n" << endl;
     string name, username, email, phone_no, address, password, confirm_password;
 
@@ -320,32 +341,41 @@ void create_account() {
         return;
     }
 
-    while (emailexistornot(email)) {
-        cout << "\tEmail already exists! Please enter a different email (or 0 to return): ";
-        cin >> email;
-        if (email == "0") {
+    while (true) {
+        email = validemailchecker(email);
+        if (email.empty()) { // User entered "0" or invalid email and chose to return
             system("CLS");
             return;
         }
+
+        if (emailexistornot(email)) {
+            cout << termcolor::red;
+            cout << "Email already exists! Please enter a different email (or 0 to return): ";
+            cout << termcolor::bright_cyan;
+            cin >> email;
+            if (email == "0") {
+                system("CLS");
+                return;
+            }
+        } else {
+            break; // Email is valid and does not exist
+        }
     }
 
-    email = validemailchecker(email);
-    if (email.empty()) {
-        system("CLS");
-        return;
-    }
-
+    cout << termcolor::bright_cyan;
     cout << "\tEnter phone no : ";
     cin >> phone_no;
     phone_no = validphonenumberchecker(phone_no);
 
     while (true) {
+        cout << termcolor::bright_cyan;
         cout << "\tEnter password : ";
         password = setPassword();
         cout << endl << "\tConfirm password : ";
         confirm_password = setPassword();
         if (password != confirm_password) {
             system("CLS");
+            cout << termcolor::red;
             cout << endl << "\tPassword does not match! Please try again..." << endl;
             continue;
         } else {
@@ -535,6 +565,7 @@ vector<Product> groceries = {
 };
 
 void selectProduct(vector<Product>& products) {
+    cout << termcolor::bright_blue << termcolor::bold;
     int choice, quantity;
     int size = products.size();
     cout << size << endl;
@@ -547,28 +578,38 @@ void selectProduct(vector<Product>& products) {
 
         cout << "\nEnter 0 to go back : " << endl;
     while (true) {
-
+        cout << termcolor::bright_blue << termcolor::bold;
         cout << "\nEnter your choice: ";
         while (!(cin >> choice) || (choice < 0 || choice > size )) { 
+            cout << termcolor::red;
             cout << "Invalid choice! Please enter a valid option: ";
+            cout << termcolor::reset;
             cin.clear();  // Clear error flag
             cin.ignore(1000, '\n');  // Ignore invalid input
         }
         if (choice == 0) {
+            cout << termcolor::reset;
             return;  // Exit product selection
         }
+        cout << termcolor::bright_blue << termcolor::bold;
         cout << "Enter quantity: ";
         cin >> quantity;
 
         if (quantity <= 0 ) {
+            cout << termcolor::red;
             cout << "\nInvalid quantity! Please enter a valid quantity." << endl;
+            cout << termcolor::reset;
             cin.clear();
             cin.ignore(1000, '\n');  // Ignore invalid input
         }
-
+        cout << termcolor::bright_blue << termcolor::bold;
         if(quantity > products[choice - 1].get_quantity()) {
-            cout << "\nSorry, We have Not enough stock available! Please enter a valid quantity." << endl;
+            cout << termcolor::red;
+            cout << "Sorry, We have Not enough stock available! Please enter a valid quantity." << endl;
+            cout << termcolor::reset;
+            cout << termcolor::bright_grey;
             cout << "Available quantity: " << products[choice - 1].get_quantity() << endl;
+            cout << termcolor::reset;
             cin.clear();
             cin.ignore(1000, '\n');  // Ignore invalid input  
         }
@@ -603,6 +644,7 @@ void selectProduct(vector<Product>& products) {
 void Inventory() {
     while (true) {
         system("CLS");
+        cout << termcolor::bright_yellow << termcolor::bold;  
         cout << "Welcome to the Inventory!" << endl;
         cout << "Please select a category:\n";
         cout << "1 : Electronics" << endl;
@@ -619,7 +661,9 @@ void Inventory() {
         cout << "Enter your choice: ";
 
         while (!(cin >> choice) || (choice < 0 || choice > 8)) { 
+            cout << termcolor::red;
             cout << "Invalid choice! Please enter a valid option: ";
+            cout << termcolor::reset;
             cin.clear();  // Clear error flag
             cin.ignore(1000, '\n');  // Ignore invalid input
         }
@@ -655,7 +699,6 @@ void Inventory() {
     }
 }
 
-// Helper function to restore inventory 
 void restoreInventory(string productName, int quantity) {
     vector<vector<Product>*> catagories = {&electronics, &footwear, &clothing, &accessories, &books, &sports, &health, &groceries};
     for (auto inventory : catagories) {
@@ -676,9 +719,8 @@ ostream& tableHeader(ostream& ob) {
        << setw(15) << "Total Price" << endl;
     return ob;
 }
-
 ostream& tableSeparator(ostream& ob) {
-    ob << "------------------------------------------------------------" << endl;
+    ob << "------------------------------------------------------------------------------------" << endl;
     return ob;
 }
 
@@ -707,7 +749,9 @@ void viewcart() {
     cout << "\nPress 0 to go back: ";
     int input;
     while (!(cin >> input) || input != 0) {
+        cout << termcolor::red;
         cout << "Invalid input! Please press 0 to go back: ";
+        cout << termcolor::reset;
         cin.clear();
         cin.ignore(1000, '\n');
     }
@@ -723,6 +767,7 @@ void removefromcart() {
     }
 
     while (true) {
+        cout << termcolor::yellow;
         cout << "========== Remove from Cart ==========" << endl << endl;
         cout << tableHeader << tableSeparator;
         for (int i = 0; i < cart.size(); i++) {
@@ -735,8 +780,9 @@ void removefromcart() {
                  << setw(15) << totalPrice << endl;
         }
         cout << tableSeparator;
-
+        cout << termcolor::bright_white;
         cout << "\nEnter the ID of the item to remove (or 0 to go back): ";
+        cout << termcolor::reset;
         int n;
         cin >> n;
 
@@ -746,8 +792,10 @@ void removefromcart() {
         }
 
         if (n < 1 || n > cart.size()) {
+            cout << termcolor::red;
             cout << "Invalid ID! Please enter a valid ID." << endl;
             cout << "Press any key to continue...";
+            cout << termcolor::reset;
             getch();
             system("CLS");
             continue;
@@ -756,8 +804,10 @@ void removefromcart() {
         cout << "Enter the quantity to remove: ";
         int quantity;
         while (!(cin >> quantity) || quantity <= 0 || quantity > cart[n - 1].get_quantity()) {
+            cout << termcolor::red;
             cout << "Invalid quantity! Please enter a value between 1 and " 
                  << cart[n - 1].get_quantity() << ": ";
+            cout << termcolor::reset;
             cin.clear();
             cin.ignore(1000, '\n');
         }
@@ -774,9 +824,10 @@ void removefromcart() {
         }
 
         restoreInventory(cart[n - 1].get_name(), quantity);
-
+        cout << termcolor::green;
         cout << "Item removed successfully!" << endl;
         cout << "Press any key to continue...";
+        cout << termcolor::reset;
         getch();
         system("CLS");
 
@@ -798,13 +849,13 @@ void bill(Customer& customer) {
         return;
     }
 
-    int billNumber = customer.get_billNumber();
+    int billNum = billNumber;
     time_t now = time(0);
     string timestamp = ctime(&now);
     timestamp.pop_back();
 
     cout << "===================== ShopSphere =====================" << endl;
-    cout << "Bill Number: " << billNumber << endl;
+    cout << "Bill Number: " << billNum << endl;
     cout << "Date: " << timestamp << endl;
     cout << "-----------------------------------------------------------" << endl;
     cout << "Customer Details:" << endl;
@@ -859,11 +910,13 @@ void bill(Customer& customer) {
     }
 
     if (choice == 1) {
-        customer.increment_billNumber();
+        billNumber++;
         cart.clear();
         saveCustomers();
+        cout << termcolor::green;
         cout << "\nPurchase confirmed! Thank you for shopping with ShopSphere!" << endl;
         cout << "Press any key to continue...";
+        cout << termcolor::reset;
         getch();
     }
 }
@@ -884,6 +937,7 @@ int main() {
 
         while (flag) {
             system("CLS");
+            cout << termcolor::bright_yellow << termcolor::bold;
             cout << "\nWelcome, " << client.get_name() << "!" << endl;
             cout << "\nSelect an option:" << endl;
             cout << "1 : View Profile" << endl;
@@ -929,8 +983,10 @@ int main() {
                 }
                 case 7: {
                     system("CLS");
+                    cout << termcolor::green;
                     cout << "Logging out..." << endl;
                     cout << "Press any key to continue...";
+                    cout << termcolor::reset;
                     getch();
                     flag = false;
                     break;
