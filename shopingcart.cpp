@@ -15,29 +15,22 @@ static int billNumber = 1000;
 
 class Customer {
     string name;
-    string username;
     string phone_no;
     string email;
-    string address;
     string password;
-    int billNumber; 
 
 public:
-    Customer() : billNumber(1000) {}
-    Customer(string name, string username, string phone_no, string email, string address, string password)
-        : name(name), username(username), phone_no(phone_no), email(email), address(address), password(password) {}
+    Customer()  {}
+    Customer(string name, string phone_no, string email, string password)
+        : name(name), phone_no(phone_no), email(email), password(password) {}
 
     string get_name() const{ return name; }
-    string get_username() const{ return username; }
     string get_password() const{ return password; }
     string get_email() const{ return email; }
-    string get_address() const{ return address; }
     string get_phoneno() const{ return phone_no; }
 
-    void update_username(string username) { this->username = username; }
     void update_phoneno(string phone_no) { this->phone_no = phone_no; }
     void update_email(string email) { this->email = email; }
-    void update_address(string address) { this->address = address; }
     void update_password(string password) { this->password = password; }
     void update_name(string name) { this->name = name; }
 
@@ -69,6 +62,8 @@ public:
     void set_name(string name) { this->name = name; }
     void set_quantity(int quantity) { this->quantity = quantity; }
 };
+
+vector<Product> cart;
 
 string setPassword() {
     string password;
@@ -103,10 +98,8 @@ void saveCustomers() {
         }
         for (const auto& customer : customers) {
             file << "name: " << customer.get_name() << endl;
-            file << "username: " << customer.get_username() << endl;
             file << "phone_no: " << customer.get_phoneno() << endl;
             file << "email: " << customer.get_email() << endl;
-            file << "address: " << customer.get_address() << endl;
             file << "password: " << customer.get_password() << endl;
             file << endl;
             // Check if write operation failed
@@ -132,27 +125,45 @@ void saveCustomers() {
 
 void loadCustomers() {
     ifstream file("customers.txt");
-    string line, name, username, phone_no, email, address, password;
-    int billNumber = 1000;
+    if (!file.is_open()) {
+        cout << "Error: Unable to open customers.txt for reading." << endl;
+        return;
+    }
+
+    string line, name, phone_no, email, password;
 
     while (getline(file, line)) {
-        if (line.find("name: ") == 0) name = line.substr(6);
-        else if (line.find("username: ") == 0) username = line.substr(10);
-        else if (line.find("phone_no: ") == 0) phone_no = line.substr(10);
-        else if (line.find("email: ") == 0) email = line.substr(7);
-        else if (line.find("address: ") == 0) address = line.substr(9);
-        else if (line.find("password: ") == 0) password = line.substr(10);
-        else if (line.find("billNumber: ") == 0) billNumber = stoi(line.substr(12));
-        else if (line.empty() && !email.empty()) {
-            Customer customer(name, username, phone_no, email, address, password);
-            billNumber++;
-            customers.push_back(customer);
-            name = username = phone_no = email = address = password = "";
-            billNumber = 1000;
+        if (line.find("name: ") == 0) {
+            name = line.substr(6);
+        } else if (line.find("phone_no: ") == 0) {
+            phone_no = line.substr(10);
+        } else if (line.find("email: ") == 0) {
+            email = line.substr(7);
+        } else if (line.find("password: ") == 0) {
+            password = line.substr(10);
+        } else if (line.empty()) {
+            // Only add if essential fields are present
+            if (!name.empty() && !email.empty() && !password.empty()) {
+                Customer customer(name, phone_no, email, password);
+                customers.push_back(customer);
+            }
+            // Clear for next customer
+            name.clear();
+            phone_no.clear();
+            email.clear();
+            password.clear();
         }
     }
+
+    // Handle last customer if file doesn't end with empty line
+    if (!name.empty() && !email.empty() && !password.empty()) {
+        Customer customer(name, phone_no, email, password);
+        customers.push_back(customer);
+    }
+
     file.close();
 }
+
 
 bool emailexistornot(string email) {
     for (const auto& customer : customers) {
@@ -179,7 +190,7 @@ string validphonenumberchecker(string phoneNumber) {
         cout << termcolor::red;
         cout << "You entered an invalid number..." << endl;
         cout << termcolor::bright_cyan;
-        cout << "\tPlease enter a valid phone number (10 digits, or 0 to return): ";
+        cout << "\tEnter a valid number: ";
         cin >> phoneNumber;
         cout << termcolor::reset;
     }
@@ -383,7 +394,7 @@ void create_account() {
         }
     }
 
-    customers.push_back(Customer(name, username, phone_no, email, address, password));
+    customers.push_back(Customer(name, phone_no, email, password));
     numberofuser++;
     saveCustomers();
 
@@ -456,8 +467,6 @@ void UpdateProfile(Customer& customer) {
 
     saveCustomers();
 }
-
-vector<Product> cart;
 
 // Define the products in each category
 vector<Product> electronics = {
