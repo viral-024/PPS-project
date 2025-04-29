@@ -179,7 +179,7 @@ string validphonenumberchecker(string phoneNumber) {
         cout << termcolor::red;
         cout << "You entered an invalid number..." << endl;
         cout << termcolor::bright_cyan;
-        cout << "\tEnter a valid number: ";
+        cout << "\tPlease enter a valid phone number (10 digits, or 0 to return): ";
         cin >> phoneNumber;
         cout << termcolor::reset;
     }
