@@ -142,12 +142,10 @@ void loadCustomers() {
         } else if (line.find("password: ") == 0) {
             password = line.substr(10);
         } else if (line.empty()) {
-            // Only add if essential fields are present
             if (!name.empty() && !email.empty() && !password.empty()) {
                 Customer customer(name, phone_no, email, password);
                 customers.push_back(customer);
             }
-            // Clear for next customer
             name.clear();
             phone_no.clear();
             email.clear();
@@ -155,7 +153,6 @@ void loadCustomers() {
         }
     }
 
-    // Handle last customer if file doesn't end with empty line
     if (!name.empty() && !email.empty() && !password.empty()) {
         Customer customer(name, phone_no, email, password);
         customers.push_back(customer);
@@ -468,7 +465,6 @@ void UpdateProfile(Customer& customer) {
     saveCustomers();
 }
 
-// Define the products in each category
 vector<Product> electronics = {
     Product("Laptop", 55990, 10),
     Product("Smartphone", 12990, 20),
