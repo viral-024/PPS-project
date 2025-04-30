@@ -322,6 +322,7 @@ Customer& login(bool& loginflag) {
             getch();
             system("CLS");
             loginflag = true;
+            cart.clear();
             return customers[account_index];
         } else {
             cout << termcolor::red;
