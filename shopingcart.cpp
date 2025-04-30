@@ -236,7 +236,9 @@ string validemailchecker(string email) {
 bool checkforlogin() {
     system("CLS");
     cout << termcolor::magenta << termcolor::bold;
-    cout << "\n\tWelcome To ShopSphere\n\n" << endl;
+    cout << "======================================" << endl;
+    cout << "\tWelcome To ShopSphere" << endl;
+    cout << "======================================\n" <<endl;
     cout << "\t1 : Login an account " << endl;
     cout << "\t2 : Create an account " << endl;
     cout << "\t3 : Exit" << "\n" << endl;
