@@ -3,3 +3,8 @@ phone_no: 9313580400
 email: kirtan@gmail.com
 password: 120
 
+name: viral
+phone_no: 9016333179
+email: viral@gmail.com
+password: 120
+
